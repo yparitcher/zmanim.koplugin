@@ -12,7 +12,7 @@ local C = ffi.C
 require("ffi/rtc_h")
 local libzmanim
 if Device:isKindle() then
-    libzmanim = ffi.load("plugins/chitad.koplugin/libzmanim.so")
+    libzmanim = ffi.load("plugins/zmanim.koplugin/libzmanim.so")
 elseif Device:isEmulator() then
     libzmanim = ffi.load("plugins/zmanim.koplugin/libzmanim-linux.so")
 else
@@ -20,9 +20,17 @@ else
 end
 require("libzmanim")
 
+ffi.cdef[[
+char *getenv(const char *) __attribute__((__nothrow__, __leaf__));
+int setenv(const char *, const char *, int) __attribute__((__nothrow__, __leaf__));
+]]
+
 local Zmanim = WidgetContainer:new{
     name = "zmanim",
     location = ffi.new("location"),
+    latitude = 40.66896,
+    longitude = -73.94284,
+    timezone = "EST5EDT,M3.2.0/2:00:00,M11.1.0/2:00:00",
 }
 
 function Zmanim:onDispatcherRegisterActions()
@@ -31,8 +39,9 @@ end
 
 function Zmanim:init()
     self:onDispatcherRegisterActions()
-    self.location.latitude = 40.66896
-    self.location.longitude = -73.94284
+    self.location.latitude = self.latitude
+    self.location.longitude = self.longitude
+    ffi.C.setenv("TZ", self.timezone, 0)
     self.ui.menu:registerToMainMenu(self)
 end
 
