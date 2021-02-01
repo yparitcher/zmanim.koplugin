@@ -98,19 +98,16 @@ function Zmanim:getZmanimCalendar()
     }
 end
 
-function Zmanim:getZman(hdate, zman)
-    return libzmanim[zman](hdate, self.location)
-end
-
-function Zmanim:formatZman(hdate)
-    return os.date("%I:%M %p %Z", tonumber(libzmanim.hdatetime_t(hdate)))
+function Zmanim:getZman(hdate, zman, text)
+    local zman = libzmanim[zman](hdate, self.location)
+    local zf = os.date("%I:%M %p %Z", tonumber(libzmanim.hdatetime_t(zman)))
+    return {text, zf}
 end
 
 function Zmanim:getDay(day_ts)
     local day = {}
     local hdate = self:tsToHdate(day_ts)
-    local zman = self:formatZman(self:getZman(hdate, "getshmabaalhatanya"))
-    table.insert(day, {"krias shema", zman})
+    table.insert(day, self:getZman(hdate, "getshmabaalhatanya", "krias shema"))
     return day
 end
 
