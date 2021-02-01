@@ -22,6 +22,7 @@ require("libzmanim")
 
 local Zmanim = WidgetContainer:new{
     name = "zmanim",
+    location = ffi.new("location"),
 }
 
 function Zmanim:onDispatcherRegisterActions()
@@ -30,6 +31,8 @@ end
 
 function Zmanim:init()
     self:onDispatcherRegisterActions()
+    self.location.latitude = 40.66896
+    self.location.longitude = -73.94284
     self.ui.menu:registerToMainMenu(self)
 end
 
@@ -91,8 +94,38 @@ function Zmanim:getZmanimCalendar()
     }
 end
 
+function Zmanim:getZman(hdate, zman)
+    return libzmanim[zman](hdate, self.location)
+end
+
+function Zmanim:formatZman(hdate)
+    return os.date("%I:%M %p %Z", tonumber(libzmanim.hdatetime_t(hdate)))
+end
+
 function Zmanim:getDay(day_ts)
-    return {}
+    local day = {}
+    local hdate = self:tsToHdate(day_ts)
+    local zman = self:formatZman(self:getZman(hdate, "getshmabaalhatanya"))
+    table.insert(day, {"krias shema", zman})
+    return day
+end
+
+function Zmanim:getDate(day_ts)
+    local hdate = self:tsToHdate(day_ts)
+    local date = ffi.new("char[?]", 7)
+    libzmanim.numtohchar(date, 6, hdate.day)
+    return ffi.string(date)
+end
+
+function Zmanim:tsToHdate(ts)
+    local t = ffi.new("time_t[1]")
+    t[0] = ts
+    local tm = ffi.new("struct tm") -- luacheck: ignore
+    tm = C.localtime(t)
+    local hdate = ffi.new("hdate")
+    hdate = libzmanim.convertDate(tm[0])
+    hdate.offset = tm[0].tm_gmtoff
+    return hdate
 end
 
 function Zmanim:popup(text, timeout)

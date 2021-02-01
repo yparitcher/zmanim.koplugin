@@ -61,58 +61,8 @@ function CalendarTitle:onClose()
     return true
 end
 
-
-local HistogramWidget = Widget:new{
-    width = nil,
-    height = nil,
-    color = Blitbuffer.COLOR_BLACK,
-    nb_items = nil,
-    ratios = nil, -- table of 1...nb_items items, each with (0 <= value <= 1)
-}
-
-function HistogramWidget:init()
-    self.dimen = Geom:new{w = self.width, h = self.height}
-    local item_width = math.floor(self.width / self.nb_items)
-    local nb_item_width_add1 = self.width - self.nb_items * item_width
-    local nb_item_width_add1_mod = math.floor(self.nb_items/nb_item_width_add1)
-    self.item_widths = {}
-    for n = 1, self.nb_items do
-        local w = item_width
-        if nb_item_width_add1 > 0 and n % nb_item_width_add1_mod == 0 then
-            w = w + 1
-            nb_item_width_add1 = nb_item_width_add1 - 1
-        end
-        table.insert(self.item_widths, w)
-    end
-    if BD.mirroredUILayout() then
-        self.do_mirror = true
-    end
-end
-
-function HistogramWidget:paintTo(bb, x, y)
-    local i_x = 0
-    for n = 1, self.nb_items do
-        if self.do_mirror then
-            n = self.nb_items - n + 1
-        end
-        local i_w = self.item_widths[n]
-        local ratio = self.ratios and self.ratios[n] or 0
-        local i_h = Math.round(ratio * self.height)
-        if i_h == 0 and ratio > 0 then -- show at least 1px
-            i_h = 1
-        end
-        local i_y = self.height - i_h
-        if i_h > 0 then
-            bb:paintRect(x + i_x, y + i_y, i_w, i_h, self.color)
-        end
-        i_x = i_x + i_w
-    end
-end
-
-
 local CalendarDay = InputContainer:new{
     daynum = nil,
-    ratio_per_hour = nil,
     filler = false,
     width = nil,
     height = nil,
@@ -149,11 +99,13 @@ function CalendarDay:init()
         padding = 0,
         bold = true,
     }
-    self.nb_not_shown_w = TextWidget:new{
+    self.hebday_w = TextWidget:new{
         text = "",
-        face = Font:getFace(self.font_face, self.font_size - 1),
-        fgcolor = Blitbuffer.COLOR_DARK_GRAY,
+        face = Font:getFace(self.font_face, self.font_size),
+        fgcolor = self.is_future and Blitbuffer.COLOR_GRAY or Blitbuffer.COLOR_BLACK,
         overlap_align = "right",
+        padding = 0,
+        bold = true,
     }
     local inner_w = self.width - 2*self.border
     self[1] = FrameContainer:new{
@@ -165,13 +117,15 @@ function CalendarDay:init()
         OverlapGroup:new{
             dimen = { w = inner_w },
             self.daynum_w,
-            self.nb_not_shown_w,
+            self.hebday_w,
         }
     }
 end
 
-function CalendarDay:updateNbNotShown(nb)
-    self.nb_not_shown_w:setText(string.format("+ %d ", nb))
+function CalendarDay:updateHebDay(text)
+    if not self.filler then
+        self.hebday_w:setText(text .. " ")
+    end
 end
 
 function CalendarDay:onTap()
@@ -209,54 +163,7 @@ function CalendarWeek:addDay(calday_widget)
     -- spans, that may span multiple days.
     table.insert(self.calday_widgets, calday_widget)
 
-    local prev_day_num = #self.days_books
-    local prev_day_books = prev_day_num > 0 and self.days_books[#self.days_books]
-    local this_day_num = prev_day_num + 1
-    local this_day_books = {}
-    table.insert(self.days_books, this_day_books)
-
-    if not calday_widget.read_books then
-        calday_widget.read_books = {}
-    end
-    local nb_books_read = #calday_widget.read_books
-    if nb_books_read > self.nb_book_spans then
-        calday_widget:updateNbNotShown(nb_books_read - self.nb_book_spans)
-    end
-    for i=1, self.nb_book_spans do
-        if calday_widget.read_books[i] then
-            this_day_books[i] = calday_widget.read_books[i] -- brings id & title keys
-            this_day_books[i].span_days = 1
-            this_day_books[i].start_day = this_day_num
-            this_day_books[i].fixed = false
-        else
-            this_day_books[i] = false
-        end
-    end
-
-    if prev_day_books then
-        -- See if continuation from previous day, and re-order them if needed
-        for pn=1, #prev_day_books do
-            local prev_book = prev_day_books[pn]
-            if prev_book then
-                for tn=1, #this_day_books do
-                    local this_book = this_day_books[tn]
-                    if this_book and this_book.id == prev_book.id then
-                        this_book.start_day = prev_book.start_day
-                        this_book.fixed = true
-                        this_book.span_days = prev_book.span_days + 1
-                        -- Update span_days in all previous books
-                        for bk = 1, prev_book.span_days do
-                            self.days_books[this_day_num-bk][pn].span_days = this_book.span_days
-                        end
-                        if tn ~= pn then -- swap it with the one at previous day position
-                            this_day_books[tn], this_day_books[pn] = this_day_books[pn], this_day_books[tn]
-                        end
-                        break
-                    end
-                end
-            end
-        end
-    end
+    calday_widget:updateHebDay(calday_widget.hebday)
 end
 
 -- Set of { Font color, background color }
@@ -611,7 +518,6 @@ function ZmanimCalendar:_populateItems()
     -- Update footer
     self.page_info_text:setText(self.cur_month)
 
-    local ratio_per_hour_by_day = {} --self.reader_statistics:getReadingRatioPerHourByDay(self.cur_month)
     local books_by_day = {} --self.reader_statistics:getReadBookByDay(self.cur_month)
 
     table.insert(self.main_content, VerticalSpan:new{ width = self.inner_padding })
@@ -671,7 +577,8 @@ function ZmanimCalendar:_populateItems()
             day = cur_date.day,
             hour = 0,
         })
-        local is_future = day_s > today_s
+        local is_future = false --day_s > today_s
+        local hebday = self.zmanim:getDate(day_ts)
         cur_week:addDay(CalendarDay:new{
             font_face = self.font_face,
             font_size = self.span_font_size,
@@ -680,9 +587,8 @@ function ZmanimCalendar:_populateItems()
             daynum = cur_date.day,
             height = self.week_height,
             width = self.day_width,
-            ratio_per_hour = ratio_per_hour_by_day[day_s],
-            read_books = books_by_day[day_s],
             show_parent = self,
+            hebday = hebday,
             callback = function()
                 -- Just as ReaderStatistics:callbackDaily(), but without any window stacking
                 UIManager:show(KeyValuePage:new{
