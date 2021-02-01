@@ -16,7 +16,6 @@ local HorizontalSpan = require("ui/widget/horizontalspan")
 local InputContainer = require("ui/widget/container/inputcontainer")
 local KeyValuePage = require("ui/widget/keyvaluepage")
 local LeftContainer = require("ui/widget/container/leftcontainer")
-local Math = require("optmath")
 local OverlapGroup = require("ui/widget/overlapgroup")
 local Size = require("ui/size")
 local TextBoxWidget = require("ui/widget/textboxwidget")
@@ -24,7 +23,6 @@ local TextWidget = require("ui/widget/textwidget")
 local UIManager = require("ui/uimanager")
 local VerticalGroup = require("ui/widget/verticalgroup")
 local VerticalSpan = require("ui/widget/verticalspan")
-local Widget = require("ui/widget/widget")
 local Input = Device.input
 local Screen = Device.screen
 local _ = require("gettext")
@@ -67,7 +65,7 @@ local CalendarDay = InputContainer:new{
     width = nil,
     height = nil,
     border = 0,
-    is_future = false,
+    is_current_day = false,
     font_face = "xx_smallinfofont",
     font_size = nil,
 }
@@ -95,14 +93,14 @@ function CalendarDay:init()
     self.daynum_w = TextWidget:new{
         text = " " .. tostring(self.daynum),
         face = Font:getFace(self.font_face, self.font_size),
-        fgcolor = self.is_future and Blitbuffer.COLOR_GRAY or Blitbuffer.COLOR_BLACK,
+        fgcolor = self.is_current_day and Blitbuffer.COLOR_GRAY or Blitbuffer.COLOR_BLACK,
         padding = 0,
         bold = true,
     }
     self.hebday_w = TextWidget:new{
         text = "",
         face = Font:getFace(self.font_face, self.font_size),
-        fgcolor = self.is_future and Blitbuffer.COLOR_GRAY or Blitbuffer.COLOR_BLACK,
+        fgcolor = self.is_current_day and Blitbuffer.COLOR_GRAY or Blitbuffer.COLOR_BLACK,
         overlap_align = "right",
         padding = 0,
         bold = true,
@@ -110,7 +108,7 @@ function CalendarDay:init()
     local inner_w = self.width - 2*self.border
     self[1] = FrameContainer:new{
         padding = 0,
-        color = self.is_future and Blitbuffer.COLOR_GRAY or Blitbuffer.COLOR_BLACK,
+        color = self.is_current_day and Blitbuffer.COLOR_GRAY or Blitbuffer.COLOR_BLACK,
         bordersize = self.border,
         width = self.width,
         height = self.height,
@@ -518,8 +516,6 @@ function ZmanimCalendar:_populateItems()
     -- Update footer
     self.page_info_text:setText(self.cur_month)
 
-    local books_by_day = {} --self.reader_statistics:getReadBookByDay(self.cur_month)
-
     table.insert(self.main_content, VerticalSpan:new{ width = self.inner_padding })
     self.weeks = {}
     local today_s = os.date("%Y-%m-%d", os.time())
@@ -577,13 +573,13 @@ function ZmanimCalendar:_populateItems()
             day = cur_date.day,
             hour = 0,
         })
-        local is_future = false --day_s > today_s
+        local is_current_day =  day_s == today_s
         local hebday = self.zmanim:getDate(day_ts)
         cur_week:addDay(CalendarDay:new{
             font_face = self.font_face,
             font_size = self.span_font_size,
             border = self.day_border,
-            is_future = is_future,
+            is_current_day = is_current_day,
             daynum = cur_date.day,
             height = self.week_height,
             width = self.day_width,

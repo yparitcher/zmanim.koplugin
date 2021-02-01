@@ -1,11 +1,7 @@
 local Device = require("device")
 local Dispatcher = require("dispatcher")
-local FFIUtil = require("ffi/util")
-local Font = require("ui/font")
-local InfoMessage = require("ui/widget/infomessage")
 local UIManager = require("ui/uimanager")
 local WidgetContainer = require("ui/widget/container/widgetcontainer")
-local util = require("util")
 local _ = require("gettext")
 local ffi = require("ffi")
 local C = ffi.C
@@ -130,8 +126,7 @@ function Zmanim:tsToHdate(ts)
     t[0] = ts
     local tm = ffi.new("struct tm") -- luacheck: ignore
     tm = C.localtime(t)
-    local hdate = ffi.new("hdate")
-    hdate = libzmanim.convertDate(tm[0])
+    local hdate = libzmanim.convertDate(tm[0])
     hdate.offset = tm[0].tm_gmtoff
     return hdate
 end
