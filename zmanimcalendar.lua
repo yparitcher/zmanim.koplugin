@@ -565,8 +565,6 @@ function ZmanimCalendar:_populateItems()
             end
         end
         local day_s = os.date("%Y-%m-%d", cur_ts)
-        local day_text = string.format("%s (%s)", day_s,
-                self.longDayOfWeekTranslation[self.weekdays[cur_date.wday]])
         local day_ts = os.time({
             year = cur_date.year,
             month = cur_date.month,

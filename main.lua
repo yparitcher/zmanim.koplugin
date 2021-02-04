@@ -1,5 +1,6 @@
 local Device = require("device")
 local Dispatcher = require("dispatcher")
+local KeyValuePage = require("ui/widget/keyvaluepage")
 local UIManager = require("ui/uimanager")
 local WidgetContainer = require("ui/widget/container/widgetcontainer")
 local _ = require("gettext")
@@ -52,6 +53,7 @@ local Zmanim = WidgetContainer:new{
 
 function Zmanim:onDispatcherRegisterActions()
     Dispatcher:registerAction("zmanimcalendar", {category="none", event="ShowZmanimCalendar", title=_("Zmanim calendar"), filemanager=true,})
+    Dispatcher:registerAction("todayszmanim", {category="none", event="TodaysZmanim", title=_("Today's Zmanim"), filemanager=true,})
 end
 
 function Zmanim:init()
@@ -72,6 +74,16 @@ end
 
 function Zmanim:onShowZmanimCalendar()
 	UIManager:show(self:getZmanimCalendar())
+end
+
+function Zmanim:onTodaysZmanim()
+    local now_ts = os.time()
+    UIManager:show(KeyValuePage:new{
+        title = self:getDateString(now_ts),
+        value_align = "right",
+        kv_pairs = self:getDay(now_ts),
+        callback_return = function() end -- to just have that return button shown
+    })
 end
 
 local shortDayOfWeekTranslation = {
@@ -153,7 +165,7 @@ function Zmanim:getDay(day_ts)
     else
         table.insert(day, self:getZman(hdate, "gettzaisbaalhatanya", "צאת הכוכבים"))
     end
-
+--[[
     for k, v in pairs(zmanlist) do
         for l, w in ipairs(v) do
             if w.def == true then
@@ -163,6 +175,7 @@ function Zmanim:getDay(day_ts)
         end
     end
     --table.insert(day, self:getZman(hdate, "getshmabaalhatanya", "krias shema"))
+--]]--
     return day
 end
 
