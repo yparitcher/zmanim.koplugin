@@ -588,7 +588,7 @@ function ZmanimCalendar:_populateItems()
             callback = function()
                 -- Just as ReaderStatistics:callbackDaily(), but without any window stacking
                 UIManager:show(KeyValuePage:new{
-                    title = day_text,
+                    title = self.zmanim:getDateString(day_ts),
                     value_align = "right",
                     kv_pairs = self.zmanim:getDay(day_ts),
                     callback_return = function() end -- to just have that return button shown

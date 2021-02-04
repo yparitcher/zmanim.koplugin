@@ -21,6 +21,27 @@ char *getenv(const char *) __attribute__((__nothrow__, __leaf__));
 int setenv(const char *, const char *, int) __attribute__((__nothrow__, __leaf__));
 ]]
 
+local zmanlist = {
+alos = { { func = "getalos", desc = "16.1°"}, { func = "getalosbaalhatanya", desc = "Baal Hatanya (16.9°)", def = true}, { func = "getalos26degrees", desc = "26°"}, { func = "getalos19p8degrees", desc = "19.8°"}, { func = "getalos18degrees", desc = "18°"}, { func = "getalos120", desc = "120 min"}, { func = "getalos120zmanis", desc = "120 min Zmanis"}, { func = "getalos96", desc = "96 min"}, { func = "getalos96zmanis", desc = "96 min Zmanis"}, { func = "getalos90", desc = "90 min"}, { func = "getalos90zmanis", desc = "90 min Zmanis"}, { func = "getalos72", desc = "72 min"}, { func = "getalos72zmanis", desc = "72 min Zmanis"}, { func = "getalos60", desc = "60 min"} },
+misheyakir = { { func = "getmisheyakir11p5degrees", desc = "11.5°"}, { func = "getmisheyakir11degrees", desc = "11°"}, { func = "getmisheyakir10p2degrees", desc = "10.2°", def = true} },
+netz = { { func = "getsunrise", desc = "Sea Level", def = true}, { func = "getelevationsunrise", desc = "Elevation Adjusted"} },
+shma = { { func = "getshmabaalhatanya", desc = "Baal Hatanya", def = true}, { func = "getshmagra", desc = "Gra"}, { func = "getshmamga", desc = "Magen Avraham"} },
+tefila = { { func = "gettefilabaalhatanya", desc = "Baal Hatanya", def = true}, { func = "gettefilagra", desc = "Gra"}, { func = "gettefilamga", desc = "Magen Avraham"} },
+achilaschometz = { { func = "getachilaschometzbaalhatanya", desc = "Baal Hatanya", def = true}, { func = "getachilaschometzgra", desc = "Gra"}, { func = "getachilaschometzmga", desc = "Magen Avraham"} },
+biurchometz = { { func = "getbiurchometzbaalhatanya", desc = "Baal Hatanya", def = true}, { func = "getbiurchometzgra", desc = "Gra"}, { func = "getbiurchometzmga", desc = "Magen Avraham"} },
+chatzos = { { func = "getchatzosbaalhatanya", desc = "Baal Hatanya", def = true}, { func = "getchatzosgra", desc = "Gra"} },
+minchagedola = { { func = "getminchagedolabaalhatanya", desc = "Baal Hatanya", def = true}, { func = "getminchagedolagra", desc = "Gra"}, { func = "getminchagedolamga", desc = "Magen Avraham"}, { func = "getminchagedolabaalhatanyag30m", desc = "Baal Hatanya 30 min"}, { func = "getminchagedolagrag30m", desc = "Gra 30 min"}, { func = "getminchagedolamgag30m", desc = "Magen Avraham 30 min"} },
+minchaketana = { { func = "getminchaketanabaalhatanya", desc = "Baal Hatanya", def = true}, { func = "getminchaketanagra", desc = "Gra"}, { func = "getminchaketanamga", desc = "Magen Avraham"} },
+plag =  {{ func = "getplagbaalhatanya", desc = "Baal Hatanya", def = true}, { func = "getplaggra", desc = "Gra"}, { func = "getplagmga", desc = "Magen Avraham"} },
+shkia = { { func = "getsunset", desc = "Sea Level", def = true}, { func = "getelevationsunset", desc = "Elevation Adjusted"} },
+tzais = { { func = "gettzaisbaalhatanya", desc = "Baal Hatanya (6°)", def = true}, { func = "gettzais8p5", desc = "8.5°"}, { func = "gettzais72", desc = "72 min"} },
+shabbosends = { { func = "gettzaisbaalhatanya", desc = "6°"}, { func = "gettzais8p5", desc = "8.5°", def = true}, { func = "gettzais72", desc = "72 min"} },
+--levanastart = { { func = "getmolad7days", desc = "7 days", def = true} },
+--levanaend = { { func = "getmoladhalfmonth", desc = "Half month", def = true}, { func = "getmolad15days", desc = "15 days"} },
+--shaahzmanis = { { func = "getshaahzmanisbaalhatanya", desc = "Baal Hatanya", def = true}, { func = "getshaahzmanisgra", desc = "Gra"}, { func = "getshaahzmanismga", desc = "Magen Avraham"} }
+}
+
+
 local Zmanim = WidgetContainer:new{
     name = "zmanim",
     location = ffi.new("location"),
@@ -99,15 +120,49 @@ function Zmanim:getZmanimCalendar()
 end
 
 function Zmanim:getZman(hdate, zman, text)
-    local zman = libzmanim[zman](hdate, self.location)
-    local zf = os.date("%I:%M %p %Z", tonumber(libzmanim.hdatetime_t(zman)))
+    local result = libzmanim[zman](hdate, self.location)
+    local zf = os.date("%I:%M %p %Z", tonumber(libzmanim.hdatetime_t(result)))
     return {text, zf}
 end
 
 function Zmanim:getDay(day_ts)
     local day = {}
     local hdate = self:tsToHdate(day_ts)
-    table.insert(day, self:getZman(hdate, "getshmabaalhatanya", "krias shema"))
+    table.insert(day, self:getZman(hdate, "getalosbaalhatanya", "עלות השחר"))
+    table.insert(day, self:getZman(hdate, "getmisheyakir10p2degrees", "משיכיר"))
+    table.insert(day, self:getZman(hdate, "getsunrise", "נץ החמה"))
+    table.insert(day, self:getZman(hdate, "getshmabaalhatanya", "סו״ז ק״ש"))
+    table.insert(day, self:getZman(hdate, "gettefilabaalhatanya", "סו״ז תפלה"))
+    table.insert(day, self:getZman(hdate, "getchatzosbaalhatanya", "חצות"))
+    table.insert(day, self:getZman(hdate, "getminchagedolabaalhatanya", "מנחה גדולה"))
+    table.insert(day, self:getZman(hdate, "getminchaketanabaalhatanya", "מנחה קטנה"))
+    table.insert(day, self:getZman(hdate, "getplagbaalhatanya", "פלג המנחה"))
+    if libzmanim.iscandlelighting(hdate) == 1 then
+        table.insert(day, self:getZman(hdate, "getcandlelighting", "הדלקת נרות"))
+    end
+    table.insert(day, self:getZman(hdate, "getsunset", "שקיעה"))
+    if libzmanim.iscandlelighting(hdate) == 2 then
+        table.insert(day, self:getZman(hdate, "gettzais8p5", "הדלקת נרות"))
+        table.insert(day, self:getZman(hdate, "gettzais8p5", "צאת הכוכבים"))
+    elseif libzmanim.isassurbemelachah(hdate) and hdate.wday ~= 6 then
+        if hdate.wday == 0 then
+            table.insert(day, self:getZman(hdate, "gettzais8p5", "יציאת השבת"))
+        else
+            table.insert(day, self:getZman(hdate, "gettzais8p5", "יציאת החג"))
+        end
+    else
+        table.insert(day, self:getZman(hdate, "gettzaisbaalhatanya", "צאת הכוכבים"))
+    end
+
+    for k, v in pairs(zmanlist) do
+        for l, w in ipairs(v) do
+            if w.def == true then
+--require("logger").warn(w.func, w.desc)
+                --table.insert(day, self:getZman(hdate, w.func, w.desc))
+            end
+        end
+    end
+    --table.insert(day, self:getZman(hdate, "getshmabaalhatanya", "krias shema"))
     return day
 end
 
@@ -115,6 +170,13 @@ function Zmanim:getDate(day_ts)
     local hdate = self:tsToHdate(day_ts)
     local date = ffi.new("char[?]", 7)
     libzmanim.numtohchar(date, 6, hdate.day)
+    return ffi.string(date)
+end
+
+function Zmanim:getDateString(day_ts)
+    local hdate = self:tsToHdate(day_ts)
+    local date = ffi.new("char[?]", 32)
+    libzmanim.hdateformat(date, 32, hdate)
     return ffi.string(date)
 end
 
