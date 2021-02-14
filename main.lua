@@ -145,6 +145,10 @@ function Zmanim:getDay(day_ts)
     table.insert(day, self:getZman(hdate, "getsunrise", "נץ החמה"))
     table.insert(day, self:getZman(hdate, "getshmabaalhatanya", "סו״ז ק״ש"))
     table.insert(day, self:getZman(hdate, "gettefilabaalhatanya", "סו״ז תפלה"))
+    if libzmanim.getyomtov(hdate) == libzmanim.EREV_PESACH then
+        table.insert(day, self:getZman(hdate, "getachilaschometzbaalhatanya", "סו״ז אכילת חמץ"))
+        table.insert(day, self:getZman(hdate, "getbiurchometzbaalhatanya", "סו״ז ביעור חמץ"))
+    end
     table.insert(day, self:getZman(hdate, "getchatzosbaalhatanya", "חצות"))
     table.insert(day, self:getZman(hdate, "getminchagedolabaalhatanya", "מנחה גדולה"))
     table.insert(day, self:getZman(hdate, "getminchaketanabaalhatanya", "מנחה קטנה"))
