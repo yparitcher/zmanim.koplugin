@@ -134,7 +134,7 @@ end
 function Zmanim:getZman(hdate, zman, text)
     local result = libzmanim[zman](hdate, self.location)
     local zf = os.date("%I:%M %p %Z", tonumber(libzmanim.hdatetime_t(result)))
-    return {text, zf}
+    return {zf, text}
 end
 
 function Zmanim:getDay(day_ts)
