@@ -318,14 +318,19 @@ function ZmanimCalendar:init()
         }
     end
 
-    local outer_padding = Size.padding.large
+    self.outer_padding = Size.padding.large
     self.inner_padding = Size.padding.small
 
     -- 7 days in a week
-    self.day_width = math.floor((self.dimen.w - 2*outer_padding - 6*self.inner_padding) / 7)
+    self.day_width = math.floor((self.dimen.w - 2*self.outer_padding - 6*self.inner_padding) / 7)
     -- Put back the possible 7px lost in rounding into outer_padding
-    outer_padding = math.floor((self.dimen.w - 7*self.day_width - 6*self.inner_padding) / 2)
-    self.content_width = self.dimen.w - 2*outer_padding
+    self.outer_padding = math.floor((self.dimen.w - 7*self.day_width - 6*self.inner_padding) / 2)
+
+    self.inner_dimen = Geom:new{
+        w = self.dimen.w - 2*self.outer_padding,
+        h = self.dimen.h - self.outer_padding, -- no bottom padding
+    }
+    self.content_width = self.inner_dimen.w
 
     local now_ts = os.time()
     if not self.cur_month then
@@ -394,8 +399,8 @@ function ZmanimCalendar:init()
             self:goToMonth(os.date("%Y-%m", os.time()))
             return
         end,
+        call_hold_input_on_tap = true,
         bordersize = 0,
-        margin = Screen:scaleBySize(20),
         text_font_face = "pgfont",
         text_font_bold = false,
     }
@@ -403,7 +408,9 @@ function ZmanimCalendar:init()
         self.page_info_first_chev,
         self.page_info_spacer,
         self.page_info_left_chev,
+        self.page_info_spacer,
         self.page_info_text,
+        self.page_info_spacer,
         self.page_info_right_chev,
         self.page_info_spacer,
         self.page_info_last_chev,
@@ -411,8 +418,8 @@ function ZmanimCalendar:init()
 
     local footer = BottomContainer:new{
         dimen = Geom:new{
-            w = self.content_width,
-            h = self.dimen.h,
+            w = self.inner_dimen.w,
+            h = self.inner_dimen.h,
         },
         self.page_info,
     }
@@ -446,9 +453,9 @@ function ZmanimCalendar:init()
     end
 
     -- At most 6 weeks in a month
-    local available_height = self.dimen.h - self.title_bar:getSize().h
+    local available_height = self.inner_dimen.h - self.title_bar:getSize().h
                             - self.page_info:getSize().h - self.day_names:getSize().h
-    self.week_height = math.floor((available_height - 5*self.inner_padding) / 6)
+    self.week_height = math.floor((available_height - 7*self.inner_padding) / 6)
     self.day_border = Size.border.default
     -- day num + nb_book_span: floor() to get some room for bottom padding
     self.span_height = math.floor((self.week_height - 2*self.day_border) / (self.nb_book_spans+1))
@@ -476,8 +483,8 @@ function ZmanimCalendar:init()
 
     local content = OverlapGroup:new{
         dimen = Geom:new{
-            w = self.content_width,
-            h = self.dimen.h,
+            w = self.inner_dimen.w,
+            h = self.inner_dimen.h,
         },
         allow_mirroring = false,
         VerticalGroup:new{
@@ -492,7 +499,9 @@ function ZmanimCalendar:init()
     self[1] = FrameContainer:new{
         width = self.dimen.w,
         height = self.dimen.h,
-        padding = outer_padding,
+        padding = self.outer_padding,
+        padding_bottom = 0,
+        margin = 0,
         bordersize = 0,
         background = Blitbuffer.COLOR_WHITE,
         content
