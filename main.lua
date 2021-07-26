@@ -17,6 +17,8 @@ else
 end
 require("libzmanim")
 
+local cchar = ffi.typeof("char[?]")
+
 ffi.cdef[[
 char *getenv(const char *) __attribute__((__nothrow__, __leaf__));
 int setenv(const char *, const char *, int) __attribute__((__nothrow__, __leaf__));
@@ -137,6 +139,13 @@ function Zmanim:getZman(hdate, zman, text)
     return {zf, text}
 end
 
+function Zmanim:getShuir(hdate, shuir)
+    local cshuir = cchar(100)
+    libzmanim[shuir](hdate, cshuir)
+    local result = ffi.string(cshuir)
+    return {"", result}
+end
+
 function Zmanim:getDay(day_ts)
     local day = {}
     local hdate = self:tsToHdate(day_ts)
@@ -169,6 +178,11 @@ function Zmanim:getDay(day_ts)
     else
         table.insert(day, self:getZman(hdate, "gettzaisbaalhatanya", "צאת הכוכבים"))
     end
+    table.insert(day, "-")
+    table.insert(day, self:getShuir(hdate, "chumash"))
+    table.insert(day, self:getShuir(hdate, "tehillim"))
+    table.insert(day, self:getShuir(hdate, "tanya"))
+    table.insert(day, self:getShuir(hdate, "rambam"))
 --[[
     for k, v in pairs(zmanlist) do
         for l, w in ipairs(v) do
@@ -185,14 +199,14 @@ end
 
 function Zmanim:getDate(day_ts)
     local hdate = self:tsToHdate(day_ts)
-    local date = ffi.new("char[?]", 7)
+    local date = cchar(7)
     libzmanim.numtohchar(date, 6, hdate.day)
     return ffi.string(date)
 end
 
 function Zmanim:getDateString(day_ts)
     local hdate = self:tsToHdate(day_ts)
-    local date = ffi.new("char[?]", 32)
+    local date = cchar(32)
     libzmanim.hdateformat(date, 32, hdate)
     return ffi.string(date)
 end
