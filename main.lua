@@ -197,6 +197,12 @@ function Zmanim:getDay(day_ts)
     return day
 end
 
+function Zmanim:getParshah(day_ts)
+    local hdate = self:tsToHdate(day_ts)
+    local parshah = libzmanim.parshahformat(libzmanim.getparshah(hdate))
+    return ffi.string(parshah)
+end
+
 function Zmanim:getDate(day_ts)
     local hdate = self:tsToHdate(day_ts)
     local date = cchar(7)

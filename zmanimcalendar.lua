@@ -105,6 +105,13 @@ function CalendarDay:init()
         padding = 0,
         bold = true,
     }
+    self.parshah_w = TextWidget:new{
+        text = self.parshah,
+        face = Font:getFace(self.font_face, self.font_size),
+        fgcolor = self.is_current_day and Blitbuffer.COLOR_GRAY or Blitbuffer.COLOR_BLACK,
+        overlap_align = "right",
+        padding = 0,
+    }
     local inner_w = self.width - 2*self.border
     self[1] = FrameContainer:new{
         padding = 0,
@@ -112,10 +119,17 @@ function CalendarDay:init()
         bordersize = self.border,
         width = self.width,
         height = self.height,
-        OverlapGroup:new{
+        VerticalGroup:new{
             dimen = { w = inner_w },
-            self.daynum_w,
-            self.hebday_w,
+            OverlapGroup:new{
+                dimen = { w = inner_w },
+                self.daynum_w,
+                self.hebday_w,
+            },
+            OverlapGroup:new{
+                dimen = { w = inner_w },
+                self.parshah_w,
+            }
         }
     }
 end
@@ -574,6 +588,7 @@ function ZmanimCalendar:_populateItems()
         })
         local is_current_day =  day_s == today_s
         local hebday = self.zmanim:getDate(day_ts)
+        local parshah = self.zmanim:getParshah(day_ts)
         cur_week:addDay(CalendarDay:new{
             font_face = self.font_face,
             font_size = self.span_font_size,
@@ -584,6 +599,7 @@ function ZmanimCalendar:_populateItems()
             width = self.day_width,
             show_parent = self,
             hebday = hebday,
+            parshah = parshah,
             callback = function()
                 -- Just as ReaderStatistics:callbackDaily(), but without any window stacking
                 UIManager:show(KeyValuePage:new{
