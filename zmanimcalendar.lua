@@ -90,6 +90,27 @@ function CalendarDay:init()
         }
     end
 
+    -- We need a smaller font size than the one provided
+    local text_height = self.span_height - 2 * (Size.margin.tiny + Size.border.thin)
+    -- We don't use any bspan_padding_v, we let that be handled by CenterContainer
+    -- and choosing an appropriate font size.
+    -- We use TextBoxWidget:getFontSizeToFitHeight() to get a fitting
+    -- font size. It's less precise than the TextWidget equivalent,
+    -- but it handles padding as 'em'.
+    -- Use a 1.3em line height
+    local inner_font_size = TextBoxWidget:getFontSizeToFitHeight(text_height, 1, 0.3)
+    -- If font size gets really small, get a larger one by using a smaller
+    -- line height: tall glyphs may bleed on the border, but we won't notice
+    -- at such small size, and we'll appreciate the readability.
+    -- (threshold values decided from visual testing)
+    if inner_font_size <= 12 then
+        inner_font_size = TextBoxWidget:getFontSizeToFitHeight(text_height, 1, 0.1)
+    elseif inner_font_size <= 15 then
+        inner_font_size = TextBoxWidget:getFontSizeToFitHeight(text_height, 1, 0.2)
+    end
+    -- But cap it to the day num font size
+    inner_font_size = math.min(inner_font_size, self.font_size)
+
     self.daynum_w = TextWidget:new{
         text = " " .. tostring(self.daynum),
         face = Font:getFace(self.font_face, self.font_size),
@@ -107,7 +128,14 @@ function CalendarDay:init()
     }
     self.parshah_w = TextWidget:new{
         text = self.parshah,
-        face = Font:getFace(self.font_face, self.font_size),
+        face = Font:getFace(self.font_face, inner_font_size),
+        fgcolor = self.is_current_day and Blitbuffer.COLOR_GRAY or Blitbuffer.COLOR_BLACK,
+        overlap_align = "right",
+        padding = 0,
+    }
+    self.yomtov_w = TextWidget:new{
+        text = self.yomtov,
+        face = Font:getFace(self.font_face, inner_font_size),
         fgcolor = self.is_current_day and Blitbuffer.COLOR_GRAY or Blitbuffer.COLOR_BLACK,
         overlap_align = "right",
         padding = 0,
@@ -120,7 +148,6 @@ function CalendarDay:init()
         width = self.width,
         height = self.height,
         VerticalGroup:new{
-            dimen = { w = inner_w },
             OverlapGroup:new{
                 dimen = { w = inner_w },
                 self.daynum_w,
@@ -129,6 +156,10 @@ function CalendarDay:init()
             OverlapGroup:new{
                 dimen = { w = inner_w },
                 self.parshah_w,
+            },
+            OverlapGroup:new{
+                dimen = { w = inner_w },
+                self.yomtov_w,
             }
         }
     }
@@ -589,6 +620,7 @@ function ZmanimCalendar:_populateItems()
         local is_current_day =  day_s == today_s
         local hebday = self.zmanim:getDate(day_ts)
         local parshah = self.zmanim:getParshah(day_ts)
+        local yomtov = self.zmanim:getYomtov(day_ts)
         cur_week:addDay(CalendarDay:new{
             font_face = self.font_face,
             font_size = self.span_font_size,
@@ -597,9 +629,11 @@ function ZmanimCalendar:_populateItems()
             daynum = cur_date.day,
             height = self.week_height,
             width = self.day_width,
+            span_height = self.span_height,
             show_parent = self,
             hebday = hebday,
             parshah = parshah,
+            yomtov = yomtov,
             callback = function()
                 -- Just as ReaderStatistics:callbackDaily(), but without any window stacking
                 UIManager:show(KeyValuePage:new{

@@ -203,6 +203,12 @@ function Zmanim:getParshah(day_ts)
     return ffi.string(parshah)
 end
 
+function Zmanim:getYomtov(day_ts)
+    local hdate = self:tsToHdate(day_ts)
+    local parshah = libzmanim.yomtovformat(libzmanim.getyomtov(hdate))
+    return ffi.string(parshah)
+end
+
 function Zmanim:getDate(day_ts)
     local hdate = self:tsToHdate(day_ts)
     local date = cchar(7)
