@@ -98,7 +98,7 @@ function CalendarDay:init()
         bold = true,
     }
     self.hebday_w = TextWidget:new{
-        text = "",
+        text = self.hebday .. " ",
         face = Font:getFace(self.font_face, self.font_size),
         fgcolor = self.is_current_day and Blitbuffer.COLOR_GRAY or Blitbuffer.COLOR_BLACK,
         overlap_align = "right",
@@ -118,12 +118,6 @@ function CalendarDay:init()
             self.hebday_w,
         }
     }
-end
-
-function CalendarDay:updateHebDay(text)
-    if not self.filler then
-        self.hebday_w:setText(text .. " ")
-    end
 end
 
 function CalendarDay:onTap()
@@ -160,8 +154,6 @@ function CalendarWeek:addDay(calday_widget)
     -- list of books read this week for later showing book
     -- spans, that may span multiple days.
     table.insert(self.calday_widgets, calday_widget)
-
-    calday_widget:updateHebDay(calday_widget.hebday)
 end
 
 -- Set of { Font color, background color }
