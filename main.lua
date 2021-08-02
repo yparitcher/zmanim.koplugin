@@ -155,7 +155,7 @@ end
 function Zmanim:getDay(day_ts)
     local day = {}
     local hdate = self:tsToHdate(day_ts)
-    local yt = self:getYomtov(hdate)
+    local yt ~= "" = self:getYomtov(hdate)
     if yt then
         table.insert(day, {"", yt})
         table.insert(day, "-")
