@@ -66,6 +66,12 @@ function Zmanim:init()
     self.ui.menu:registerToMainMenu(self)
 end
 
+function Zmanim:setLocation(latitude, longitude, timezone)
+    self.location.latitude = latitude
+    self.location.longitude = longitude
+    ffi.C.setenv("TZ", timezone, 1)
+end
+
 function Zmanim:addToMainMenu(menu_items)
     menu_items.zmanim = {
         text = _("Zmanim calendar"),
