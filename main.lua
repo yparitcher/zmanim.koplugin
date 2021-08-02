@@ -155,6 +155,8 @@ end
 function Zmanim:getDay(day_ts)
     local day = {}
     local hdate = self:tsToHdate(day_ts)
+    table.insert(day, {"", self:getYomtov(hdate)})
+    table.insert(day, "-")
     table.insert(day, self:getZman(hdate, "getalosbaalhatanya", "עלות השחר"))
     table.insert(day, self:getZman(hdate, "getmisheyakir10p2degrees", "משיכיר"))
     table.insert(day, self:getZman(hdate, "getsunrise", "נץ החמה"))
@@ -203,20 +205,17 @@ function Zmanim:getDay(day_ts)
     return day
 end
 
-function Zmanim:getParshah(day_ts)
-    local hdate = self:tsToHdate(day_ts)
+function Zmanim:getParshah(hdate)
     local parshah = libzmanim.parshahformat(libzmanim.getparshah(hdate))
     return ffi.string(parshah)
 end
 
-function Zmanim:getYomtov(day_ts)
-    local hdate = self:tsToHdate(day_ts)
-    local parshah = libzmanim.yomtovformat(libzmanim.getyomtov(hdate))
-    return ffi.string(parshah)
+function Zmanim:getYomtov(hdate)
+    local yomtov = libzmanim.yomtovformat(libzmanim.getyomtov(hdate))
+    return ffi.string(yomtov)
 end
 
-function Zmanim:getDate(day_ts)
-    local hdate = self:tsToHdate(day_ts)
+function Zmanim:getDate(hdate)
     local date = cchar(7)
     libzmanim.numtohchar(date, 6, hdate.day)
     return ffi.string(date)

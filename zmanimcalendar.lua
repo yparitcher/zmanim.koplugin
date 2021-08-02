@@ -119,7 +119,7 @@ function CalendarDay:init()
         bold = true,
     }
     self.hebday_w = TextWidget:new{
-        text = self.hebday .. " ",
+        text =  self.zmanim:getDate(self.hdate) .. " ",
         face = Font:getFace(self.font_face, self.font_size),
         fgcolor = self.is_current_day and Blitbuffer.COLOR_GRAY or Blitbuffer.COLOR_BLACK,
         overlap_align = "right",
@@ -127,18 +127,18 @@ function CalendarDay:init()
         bold = true,
     }
     self.parshah_w = TextWidget:new{
-        text = self.parshah,
+        text =  self.zmanim:getParshah(self.hdate),
         face = Font:getFace(self.font_face, inner_font_size),
         fgcolor = self.is_current_day and Blitbuffer.COLOR_GRAY or Blitbuffer.COLOR_BLACK,
         overlap_align = "right",
-        padding = 0,
+        max_width = self.width,
     }
     self.yomtov_w = TextWidget:new{
-        text = self.yomtov,
+        text =  self.zmanim:getYomtov(self.hdate),
         face = Font:getFace(self.font_face, inner_font_size),
         fgcolor = self.is_current_day and Blitbuffer.COLOR_GRAY or Blitbuffer.COLOR_BLACK,
         overlap_align = "right",
-        padding = 0,
+        max_width = self.width,
     }
     local inner_w = self.width - 2*self.border
     self[1] = FrameContainer:new{
@@ -618,9 +618,7 @@ function ZmanimCalendar:_populateItems()
             hour = 0,
         })
         local is_current_day =  day_s == today_s
-        local hebday = self.zmanim:getDate(day_ts)
-        local parshah = self.zmanim:getParshah(day_ts)
-        local yomtov = self.zmanim:getYomtov(day_ts)
+        local hdate = self.zmanim:tsToHdate(day_ts)
         cur_week:addDay(CalendarDay:new{
             font_face = self.font_face,
             font_size = self.span_font_size,
@@ -631,9 +629,8 @@ function ZmanimCalendar:_populateItems()
             width = self.day_width,
             span_height = self.span_height,
             show_parent = self,
-            hebday = hebday,
-            parshah = parshah,
-            yomtov = yomtov,
+            hdate = hdate,
+            zmanim = self.zmanim,
             callback = function()
                 -- Just as ReaderStatistics:callbackDaily(), but without any window stacking
                 UIManager:show(KeyValuePage:new{
