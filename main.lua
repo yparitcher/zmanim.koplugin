@@ -155,8 +155,11 @@ end
 function Zmanim:getDay(day_ts)
     local day = {}
     local hdate = self:tsToHdate(day_ts)
-    table.insert(day, {"", self:getYomtov(hdate)})
-    table.insert(day, "-")
+    local yt = self:getYomtov(hdate)
+    if yt then
+        table.insert(day, {"", yt})
+        table.insert(day, "-")
+    end
     table.insert(day, self:getZman(hdate, "getalosbaalhatanya", "עלות השחר"))
     table.insert(day, self:getZman(hdate, "getmisheyakir10p2degrees", "משיכיר"))
     table.insert(day, self:getZman(hdate, "getsunrise", "נץ החמה"))
