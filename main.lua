@@ -8,10 +8,11 @@ local ffi = require("ffi")
 local C = ffi.C
 require("ffi/rtc_h")
 local libzmanim
-if Device:isKindle() then
-    libzmanim = ffi.load("plugins/zmanim.koplugin/libzmanim.so")
-elseif Device:isEmulator() then
-    libzmanim = ffi.load("plugins/zmanim.koplugin/libzmanim-linux.so")
+-- Requires libzmanim
+-- libzmanim.lua (ffi cdecl) in lua package path /usr/local/ or ~/luarocks/ lua/5.1/libzmanim.lua
+-- libzmanim.so in linker path /usr/lib/
+if Device:isKindle() or Device:isEmulator() then
+    libzmanim = ffi.load("libzmanim.so")
 else
     return { disabled = true, }
 end
@@ -24,7 +25,7 @@ char *getenv(const char *) __attribute__((__nothrow__, __leaf__));
 int setenv(const char *, const char *, int) __attribute__((__nothrow__, __leaf__));
 ]]
 
-local zmanlist = {
+local zmanlist = { -- luacheck: no unused
 alos = { { func = "getalos", desc = "16.1°"}, { func = "getalosbaalhatanya", desc = "Baal Hatanya (16.9°)", def = true}, { func = "getalos26degrees", desc = "26°"}, { func = "getalos19p8degrees", desc = "19.8°"}, { func = "getalos18degrees", desc = "18°"}, { func = "getalos120", desc = "120 min"}, { func = "getalos120zmanis", desc = "120 min Zmanis"}, { func = "getalos96", desc = "96 min"}, { func = "getalos96zmanis", desc = "96 min Zmanis"}, { func = "getalos90", desc = "90 min"}, { func = "getalos90zmanis", desc = "90 min Zmanis"}, { func = "getalos72", desc = "72 min"}, { func = "getalos72zmanis", desc = "72 min Zmanis"}, { func = "getalos60", desc = "60 min"} },
 misheyakir = { { func = "getmisheyakir11p5degrees", desc = "11.5°"}, { func = "getmisheyakir11degrees", desc = "11°"}, { func = "getmisheyakir10p2degrees", desc = "10.2°", def = true} },
 netz = { { func = "getsunrise", desc = "Sea Level", def = true}, { func = "getelevationsunrise", desc = "Elevation Adjusted"} },
