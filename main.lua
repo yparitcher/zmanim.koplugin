@@ -49,9 +49,9 @@ shabbosends = { { func = "gettzaisbaalhatanya", desc = "6°"}, { func = "gettzai
 local Zmanim = WidgetContainer:new{
     name = "zmanim",
     location = ffi.new("location"),
-    latitude = 40.66896,
-    longitude = -73.94284,
-    timezone = "EST5EDT,M3.2.0/2:00:00,M11.1.0/2:00:00",
+    latitude = G_reader_settings:readSetting("zmanim_latitude", 40.66896),
+    longitude = G_reader_settings:readSetting("zmanim_longitude", 73.94284),
+    timezone = G_reader_settings:readSetting("zmanim_timezone", "EST5EDT,M3.2.0/2:00:00,M11.1.0/2:00:00"),
 }
 
 function Zmanim:onDispatcherRegisterActions()
