@@ -8,6 +8,7 @@ local Dispatcher = require("dispatcher")
 local KeyValuePage = require("ui/widget/keyvaluepage")
 local UIManager = require("ui/uimanager")
 local WidgetContainer = require("ui/widget/container/widgetcontainer")
+local LocationDialog = require("locationdialog")
 local _ = require("gettext")
 local ffi = require("ffi")
 local C = ffi.C
@@ -49,9 +50,6 @@ shabbosends = { { func = "gettzaisbaalhatanya", desc = "6°"}, { func = "gettzai
 local Zmanim = WidgetContainer:new{
     name = "zmanim",
     location = ffi.new("location"),
-    latitude = G_reader_settings:readSetting("zmanim_latitude", 40.66896),
-    longitude = G_reader_settings:readSetting("zmanim_longitude", 73.94284),
-    timezone = G_reader_settings:readSetting("zmanim_timezone", "EST5EDT,M3.2.0/2:00:00,M11.1.0/2:00:00"),
 }
 
 function Zmanim:onDispatcherRegisterActions()
@@ -61,16 +59,23 @@ end
 
 function Zmanim:init()
     self:onDispatcherRegisterActions()
-    self.location.latitude = self.latitude
-    self.location.longitude = self.longitude
-    ffi.C.setenv("TZ", self.timezone, 0)
+     self:setLocation(G_reader_settings:readSetting("zmanim_place",
+        {
+        name = "NY",
+        latitude = 40.66896,
+        longitude = -73.94284,
+        timezone = "EST5EDT,M3.2.0/2:00:00,M11.1.0/2:00:00",
+        }), false)
     self.ui.menu:registerToMainMenu(self)
 end
 
-function Zmanim:setLocation(latitude, longitude, timezone)
-    self.location.latitude = latitude
-    self.location.longitude = longitude
-    ffi.C.setenv("TZ", timezone, 1)
+function Zmanim:setLocation(place, set_default)
+    self.location.latitude = place.latitude
+    self.location.longitude = place.longitude
+    ffi.C.setenv("TZ", place.timezone, 1)
+    if set_default then
+        G_reader_settings:saveSetting("zmanim_place", place)
+    end
 end
 
 function Zmanim:addToMainMenu(menu_items)
@@ -78,6 +83,7 @@ function Zmanim:addToMainMenu(menu_items)
         text = _("Zmanim calendar"),
         sorting_hint = "tools",
         callback = function() Zmanim:onShowZmanimCalendar() end,
+        hold_callback = function() UIManager:show(LocationDialog:new{zmanim = self,}) end,
     }
 end
 
