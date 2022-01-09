@@ -5,7 +5,6 @@ local Blitbuffer = require("ffi/blitbuffer")
 local BottomContainer = require("ui/widget/container/bottomcontainer")
 local Button = require("ui/widget/button")
 local CenterContainer = require("ui/widget/container/centercontainer")
-local CloseButton = require("ui/widget/closebutton")
 local Device = require("device")
 local Font = require("ui/font")
 local FrameContainer = require("ui/widget/container/framecontainer")
@@ -20,44 +19,13 @@ local OverlapGroup = require("ui/widget/overlapgroup")
 local Size = require("ui/size")
 local TextBoxWidget = require("ui/widget/textboxwidget")
 local TextWidget = require("ui/widget/textwidget")
+local TitleBar = require("ui/widget/titlebar")
 local UIManager = require("ui/uimanager")
 local VerticalGroup = require("ui/widget/verticalgroup")
 local VerticalSpan = require("ui/widget/verticalspan")
 local Input = Device.input
 local Screen = Device.screen
 local _ = require("gettext")
-
-local CalendarTitle = VerticalGroup:new{
-    calendar_view = nil,
-    title = "",
-    tface = Font:getFace("tfont"),
-    align = "left",
-}
-
-function CalendarTitle:init()
-    self.close_button = CloseButton:new{ window = self }
-    local btn_width = self.close_button:getSize().w
-    self.text_w = TextWidget:new{
-        text = self.title,
-        max_width = self.width - btn_width,
-        face = self.tface,
-    }
-    table.insert(self, OverlapGroup:new{
-        dimen = { w = self.width },
-        self.text_w,
-        self.close_button,
-    })
-    table.insert(self, VerticalSpan:new{ width = Size.span.vertical_large })
-end
-
-function CalendarTitle:setTitle(title)
-    self.text_w:setText(title)
-end
-
-function CalendarTitle:onClose()
-    self.calendar_view:onClose()
-    return true
-end
 
 local CalendarDay = InputContainer:new{
     daynum = nil,
@@ -363,11 +331,7 @@ function ZmanimCalendar:init()
     -- Put back the possible 7px lost in rounding into outer_padding
     self.outer_padding = math.floor((self.dimen.w - 7*self.day_width - 6*self.inner_padding) / 2)
 
-    self.inner_dimen = Geom:new{
-        w = self.dimen.w - 2*self.outer_padding,
-        h = self.dimen.h - self.outer_padding, -- no bottom padding
-    }
-    self.content_width = self.inner_dimen.w
+    self.content_width = self.dimen.w - 2*self.outer_padding    self.content_width = self.dimen.w - 2*self.outer_padding
 
     local now_ts = os.time()
     if not self.cur_month then
@@ -454,18 +418,22 @@ function ZmanimCalendar:init()
     }
 
     local footer = BottomContainer:new{
+        -- (BottomContainer does horizontal centering)
         dimen = Geom:new{
-            w = self.inner_dimen.w,
-            h = self.inner_dimen.h,
+            w = self.dimen.w,
+            h = self.dimen.h,
         },
         self.page_info,
     }
 
-    self.title_bar = CalendarTitle:new{
+    self.title_bar = TitleBar:new{
+        fullscreen = self.covers_fullscreen,
+        width = self.dimen.w,
+        align = "left",
         title = self.title,
-        width = self.content_width,
-        height = Size.item.height_default,
-        calendar_view = self,
+        title_h_padding = self.outer_padding, -- have month name aligned with calendar left edge
+        close_callback = function() self:onClose() end,
+        show_parent = self,
     }
 
     -- week days names header
@@ -490,7 +458,7 @@ function ZmanimCalendar:init()
     end
 
     -- At most 6 weeks in a month
-    local available_height = self.inner_dimen.h - self.title_bar:getSize().h
+    local available_height = self.dimen.h - self.title_bar:getHeight()
                             - self.page_info:getSize().h - self.day_names:getSize().h
     self.week_height = math.floor((available_height - 7*self.inner_padding) / 6)
     self.day_border = Size.border.default
@@ -520,15 +488,18 @@ function ZmanimCalendar:init()
 
     local content = OverlapGroup:new{
         dimen = Geom:new{
-            w = self.inner_dimen.w,
-            h = self.inner_dimen.h,
+            w = self.dimen.w,
+            h = self.dimen.h,
         },
         allow_mirroring = false,
         VerticalGroup:new{
             align = "left",
             self.title_bar,
             self.day_names,
-            self.main_content,
+            HorizontalGroup:new{
+                HorizontalSpan:new{ width = self.outer_padding },
+                self.main_content,
+            },
         },
         footer,
     }
@@ -536,8 +507,7 @@ function ZmanimCalendar:init()
     self[1] = FrameContainer:new{
         width = self.dimen.w,
         height = self.dimen.h,
-        padding = self.outer_padding,
-        padding_bottom = 0,
+        padding = 0,
         margin = 0,
         bordersize = 0,
         background = Blitbuffer.COLOR_WHITE,

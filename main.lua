@@ -88,7 +88,7 @@ function Zmanim:addToMainMenu(menu_items)
 end
 
 function Zmanim:onShowZmanimCalendar()
-	UIManager:show(self:getZmanimCalendar())
+    UIManager:show(self:getZmanimCalendar())
 end
 
 function Zmanim:onTodaysZmanim()
