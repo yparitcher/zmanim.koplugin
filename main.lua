@@ -1,6 +1,13 @@
-local Device = require("device")
+local ffi = require("ffi")
+local C = ffi.C
+require("ffi/rtc_h")
 
-if not (Device:isKindle() or Device:isEmulator()) then
+-- Requires libzmanim
+-- libzmanim.lua (ffi cdecl) in lua package path /usr/local/ or ~/luarocks/ lua/5.1/libzmanim.lua
+-- libzmanim.so in linker path /usr/lib/
+local libzmanim = require("libzmanim_load")
+
+if not libzmanim then
     return { disabled = true, }
 end
 
@@ -10,14 +17,6 @@ local UIManager = require("ui/uimanager")
 local WidgetContainer = require("ui/widget/container/widgetcontainer")
 local LocationDialog = require("locationdialog")
 local _ = require("gettext")
-local ffi = require("ffi")
-local C = ffi.C
-require("ffi/rtc_h")
-
--- Requires libzmanim
--- libzmanim.lua (ffi cdecl) in lua package path /usr/local/ or ~/luarocks/ lua/5.1/libzmanim.lua
--- libzmanim.so in linker path /usr/lib/
-local libzmanim = require("libzmanim_load")
 
 local cchar = ffi.typeof("char[?]")
 
