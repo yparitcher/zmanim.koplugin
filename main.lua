@@ -1,8 +1,5 @@
-local ffi = require("ffi")
-local C = ffi.C
-require("ffi/rtc_h")
-
 -- Requires libzmanim
+-- luarocks --lua-version=5.1 install libzmanim CC=arm-kindlepw2-linux-gnueabi-gcc --tree=rocks
 -- libzmanim.lua (ffi cdecl) in lua package path /usr/local/ or ~/luarocks/ lua/5.1/libzmanim.lua
 -- libzmanim.so in linker path /usr/lib/
 local libzmanim = require("libzmanim_load")
@@ -17,6 +14,9 @@ local UIManager = require("ui/uimanager")
 local WidgetContainer = require("ui/widget/container/widgetcontainer")
 local LocationDialog = require("locationdialog")
 local _ = require("gettext")
+local ffi = require("ffi")
+local C = ffi.C
+require("ffi/rtc_h")
 
 local cchar = ffi.typeof("char[?]")
 
