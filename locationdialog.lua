@@ -93,7 +93,6 @@ function LocationDialog:init()
         background = Blitbuffer.COLOR_WHITE,
         VerticalGroup:new{
             align = "center",
-            self.title_widget,
             self.title_bar,
             VerticalSpan:new{
                 width = Size.span.vertical_large*2,
