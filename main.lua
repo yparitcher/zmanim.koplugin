@@ -99,4 +99,17 @@ function Zmanim:onZmanimSS()
     UIManager:show(ZmanimSS:new{})
 end
 
+function Zmanim:onSuspend()
+    if not self.screensaverwidget then
+        self.screensaverwidget = ZmanimSS:new{}
+        UIManager:show(self.screensaverwidget)
+    end
+end
+
+function Zmanim:onResume()
+    if self.screensaverwidget then
+        UIManager:close(self.screensaverwidget)
+    end
+end
+
 return Zmanim
