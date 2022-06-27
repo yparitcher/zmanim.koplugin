@@ -91,11 +91,11 @@ function Zmanim:onShowZmanimCalendar()
 end
 
 function Zmanim:onTodaysZmanim()
-    local now_ts = os.time()
+    local hdate = Zmanim:tsToHdate(os.time())
     UIManager:show(KeyValuePage:new{
-        title = self:getDateString(now_ts),
+        title = self:getDateString(hdate),
         value_align = "right",
-        kv_pairs = self:getDay(now_ts),
+        kv_pairs = self:getDay(hdate),
         callback_return = function() end -- to just have that return button shown
     })
 end
@@ -158,9 +158,8 @@ function Zmanim:getShuir(hdate, shuir)
     return {"", result}
 end
 
-function Zmanim:getDay(day_ts)
+function Zmanim:getDay(hdate)
     local day = {}
-    local hdate = self:tsToHdate(day_ts)
     local yt = self:getYomtov(hdate)
     if yt ~= "" then
         table.insert(day, {"", yt})
@@ -230,8 +229,7 @@ function Zmanim:getDate(hdate)
     return ffi.string(date)
 end
 
-function Zmanim:getDateString(day_ts)
-    local hdate = self:tsToHdate(day_ts)
+function Zmanim:getDateString(hdate)
     local date = cchar(32)
     libzmanim.hdateformat(date, 32, hdate)
     return ffi.string(date)
