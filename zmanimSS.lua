@@ -90,7 +90,18 @@ end
 function ZmanimSS:genContent()
     self.content = {}
     local hdate = ZmanimUtil:tsToHdate(os.time())
-    -- @TODO Night rollover
+    local day_string = ""
+    local night_func
+    if libzmanim.isassurbemelachah(hdate) then
+        night_func = "gettzais8p5"
+    else
+        night_func = "gettzaisbaalhatanya"
+    end
+    local night_zman = libzmanim[night_func](hdate, ZmanimUtil:getLocation())
+    if libzmanim.hdatecompare(hdate, night_zman) < 0 then
+        libzmanim.hdateaddday(hdate, 1)
+        day_string = "ליל "
+    end
 
     local zl = {}
     table.insert(zl, self:getZman(hdate, "getalosbaalhatanya", "עלות"))
@@ -122,7 +133,8 @@ function ZmanimSS:genContent()
         table.insert(zl, self:getShuir(hdate, "tehillim"))
     end
 
-    table.insert(self.content, ZmanimUtil:getDateString(hdate) .. ZmanimUtil:getYomtov(hdate))
+    day_string = day_string .. ZmanimUtil:getDateString(hdate) .. ZmanimUtil:getYomtov(hdate)
+    table.insert(self.content, day_string)
     local ziterator = #zl/2
     for k =1,ziterator do
         table.insert(self.content, {zl[ziterator+k], zl[k]})
@@ -133,6 +145,7 @@ function ZmanimSS:genContent()
 end
 
 function ZmanimSS:genWidget()
+    -- @TODO B"H
     local items = #self.content
     local item_height =  math.floor((self.height - (Size.line.thick * (items - 1))) / items)
     local half_width = math.floor((self.width - Size.line.thick) /2)
