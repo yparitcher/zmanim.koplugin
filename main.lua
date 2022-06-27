@@ -13,6 +13,7 @@ local KeyValuePage = require("ui/widget/keyvaluepage")
 local UIManager = require("ui/uimanager")
 local WidgetContainer = require("ui/widget/container/widgetcontainer")
 local LocationDialog = require("locationdialog")
+local ZmanimSS = require("zmanimSS")
 local _ = require("gettext")
 local ffi = require("ffi")
 local C = ffi.C
@@ -54,6 +55,7 @@ local Zmanim = WidgetContainer:new{
 function Zmanim:onDispatcherRegisterActions()
     Dispatcher:registerAction("zmanimcalendar", {category="none", event="ShowZmanimCalendar", title=_("Zmanim calendar"), filemanager=true,})
     Dispatcher:registerAction("todayszmanim", {category="none", event="TodaysZmanim", title=_("Today's Zmanim"), filemanager=true,})
+    Dispatcher:registerAction("ZmanimSS", {category="none", event="ZmanimSS", title=_("Zmanim SS"), filemanager=true,})
 end
 
 function Zmanim:init()
@@ -243,6 +245,10 @@ function Zmanim:tsToHdate(ts)
     local hdate = libzmanim.convertDate(tm[0])
     hdate.offset = tm[0].tm_gmtoff
     return hdate
+end
+
+function Zmanim:onZmanimSS()
+    UIManager:show(ZmanimSS:new{zmanim = self})
 end
 
 return Zmanim
