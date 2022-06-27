@@ -28,12 +28,13 @@ local cchar = ffi.typeof("char[?]")
 local ZmanimSS = InputContainer:new{
     name = "ZmanimSS",
     covers_fullscreen = true,
+    modal = true,
     content = nil,
     widget = nil,
     orig_rotation_mode = nil,
     zmanim = nil,
     background = Blitbuffer.COLOR_LIGHT_GRAY,
-    face = Font:getFace("ezra", 28),    
+    face = nil,
 }
 
 function ZmanimSS:init()
@@ -150,6 +151,7 @@ function ZmanimSS:genWidget()
     local items = #self.content
     local item_height =  math.floor((self.height - (Size.line.thick * (items - 1))) / items)
     local half_width = math.floor((self.width - Size.line.thick) /2)
+    self.face = Font:getFace("ezra", Screen:scaleBySize(19))
     local vg = VerticalGroup:new{}
     for k, v in ipairs(self.content) do
         if k ~= 1 then
@@ -171,7 +173,7 @@ function ZmanimSS:genWidget()
                 if type(v1) == "table" then
                     hg1 = HorizontalGroup:new{}
                     table.insert(hg1, RightContainer:new{
-                        dimen = Geom:new{ w = math.floor(half_width * .2), h = item_height },
+                        dimen = Geom:new{ w = math.floor(half_width * .25), h = item_height },
                         TextWidget:new{
                             text = v1[1],
                             face = self.face,
@@ -179,7 +181,7 @@ function ZmanimSS:genWidget()
                         }
                     })
                     table.insert(hg1, RightContainer:new{
-                        dimen = Geom:new{ w = math.floor(half_width * .7), h = item_height },
+                        dimen = Geom:new{ w = math.floor(half_width * .65), h = item_height },
                         TextWidget:new{
                             text = v1[2],
                             face = self.face,
@@ -244,9 +246,7 @@ function ZmanimSS:update()
         self.widget,
     }
     self[1] = self.main_frame
-    UIManager:setDirty(self, function()
-        return "full", self.main_frame.dimen
-    end)
+    UIManager:setDirty(self, "full")
 end
 
 function ZmanimSS:onShow()
@@ -280,10 +280,7 @@ function ZmanimSS:onCloseWidget()
         self.orig_rotation_mode = nil
     end
 
-    -- Make it full-screen (self.main_frame.dimen might be in a different orientation, and it's already full-screen anyway...)
-    UIManager:setDirty(nil, function()
-        return "full"
-    end)
+    UIManager:setDirty(nil, "full")
 --[[--
     -- Will come after the Resume event, iff screensaver_delay is set.
     -- Comes *before* it otherwise.
