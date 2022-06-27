@@ -1,4 +1,3 @@
-local BD = require("ui/bidi")
 local Blitbuffer = require("ffi/blitbuffer")
 local Device = require("device")
 --local Event = require("ui/event")
@@ -8,9 +7,9 @@ local GestureRange = require("ui/gesturerange")
 local CenterContainer = require("ui/widget/container/centercontainer")
 local FrameContainer = require("ui/widget/container/framecontainer")
 local HorizontalGroup = require("ui/widget/horizontalgroup")
-local HorizontalSpan = require("ui/widget/horizontalspan")
+--local HorizontalSpan = require("ui/widget/horizontalspan")
 local InputContainer = require("ui/widget/container/inputcontainer")
-local LeftContainer = require("ui/widget/container/leftcontainer")
+--local LeftContainer = require("ui/widget/container/leftcontainer")
 local LineWidget = require("ui/widget/linewidget")
 local RightContainer = require("ui/widget/container/rightcontainer")
 local Size = require("ui/size")
@@ -124,27 +123,13 @@ function ZmanimSS:genContent()
     end
 
     table.insert(self.content, self.zmanim:getDateString(hdate) .. self.zmanim:getYomtov(hdate))
-    ziterator = #zl/2
+    local ziterator = #zl/2
     for k =1,ziterator do
         table.insert(self.content, {zl[ziterator+k], zl[k]})
     end
     table.insert(self.content, self:getShuir(hdate, "chumash"))
     table.insert(self.content, self:getShuir(hdate, "tanya"))
     table.insert(self.content, self:getShuir(hdate, "rambam"))
---[[--    
-    self.content = {
-        "כ״ז סיון תשפ״ב",
-        {{"3:30", "עלות"}, {"1:36", "מנחה גדולה"}},
-        {{"4:23", "משיכיר"}, {"5:25", "מנחה קטנה"}},
-        {{"5:26", "נץ החמה"}, {"7:00", "פלג המנחה"}},
-        {{"9:10", "עלות"}, {"8:30", "שקיעה"}},
-        {{"10:26", "תפלה"}, {"9:04", "צאת"}},
-        {{"12:58", "חצות"}, "ק״כ - קל״ד"},
-        "פרשת קרח - ראשון עם פירש״י",
-        "וממלא כל עלמין - ־פד־ גבול ותכלית.",
-        "הלכות שבת - פרק ששי",
-    }
---]]--
 end
 
 function ZmanimSS:genWidget()
