@@ -79,7 +79,7 @@ function ZmanimSS:getShuir(hdate, shuir)
     local cshuir = cchar(100)
     libzmanim[shuir](hdate, cshuir)
     local result = ffi.string(cshuir)
-    local sub
+    local sub, _
     if shuir ~= "chumash" then
         sub, _ = string.gsub(result, "[^\n]-\n", "", 1)
     end
@@ -136,7 +136,7 @@ function ZmanimSS:genWidget()
     local items = #self.content
     local item_height =  math.floor((self.height - (Size.line.thick * (items - 1))) / items)
     local half_width = math.floor((self.width - Size.line.thick) /2)
-    self.face = Font:getFace("ezra", Screen:scaleBySize(19))
+    self.face = Font:getFace("ezra", 40) -- @TODO scaleBySize ?
     local vg = VerticalGroup:new{}
     for k, v in ipairs(self.content) do
         if k ~= 1 then
@@ -203,7 +203,7 @@ function ZmanimSS:genWidget()
         end
         table.insert(vg, hg)
     end
-require("logger").warn("@@@")
+require("logger").warn("@@@", Screen:scaleBySize(19))
 
     self.widget = CenterContainer:new{
         dimen = Geom:new{
