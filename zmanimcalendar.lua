@@ -23,9 +23,35 @@ local TitleBar = require("ui/widget/titlebar")
 local UIManager = require("ui/uimanager")
 local VerticalGroup = require("ui/widget/verticalgroup")
 local VerticalSpan = require("ui/widget/verticalspan")
+local ZmanimUtil = require("zmanimutil")
 local Input = Device.input
 local Screen = Device.screen
 local _ = require("gettext")
+
+local shortDayOfWeekTranslation = {
+    ["Mon"] = _("Mon"),
+    ["Tue"] = _("Tue"),
+    ["Wed"] = _("Wed"),
+    ["Thu"] = _("Thu"),
+    ["Fri"] = _("Fri"),
+    ["Sat"] = _("Sat"),
+    ["Sun"] = _("Sun"),
+}
+
+local monthTranslation = {
+    ["January"] = _("January"),
+    ["February"] = _("February"),
+    ["March"] = _("March"),
+    ["April"] = _("April"),
+    ["May"] = _("May"),
+    ["June"] = _("June"),
+    ["July"] = _("July"),
+    ["August"] = _("August"),
+    ["September"] = _("September"),
+    ["October"] = _("October"),
+    ["November"] = _("November"),
+    ["December"] = _("December"),
+}
 
 local CalendarDay = InputContainer:new{
     daynum = nil,
@@ -87,7 +113,7 @@ function CalendarDay:init()
         bold = true,
     }
     self.hebday_w = TextWidget:new{
-        text =  self.zmanim:getDate(self.hdate) .. " ",
+        text =  ZmanimUtil:getDate(self.hdate) .. " ",
         face = Font:getFace(self.font_face, self.font_size),
         fgcolor = self.is_current_day and Blitbuffer.COLOR_GRAY or Blitbuffer.COLOR_BLACK,
         overlap_align = "right",
@@ -95,14 +121,14 @@ function CalendarDay:init()
         bold = true,
     }
     self.parshah_w = TextWidget:new{
-        text =  self.zmanim:getParshah(self.hdate),
+        text =  ZmanimUtil:getParshah(self.hdate),
         face = Font:getFace(self.font_face, inner_font_size),
         fgcolor = self.is_current_day and Blitbuffer.COLOR_GRAY or Blitbuffer.COLOR_BLACK,
         overlap_align = "right",
         max_width = self.width,
     }
     self.yomtov_w = TextWidget:new{
-        text =  self.zmanim:getYomtov(self.hdate),
+        text =  ZmanimUtil:getYomtov(self.hdate),
         face = Font:getFace(self.font_face, inner_font_size),
         fgcolor = self.is_current_day and Blitbuffer.COLOR_GRAY or Blitbuffer.COLOR_BLACK,
         overlap_align = "right",
@@ -282,10 +308,6 @@ function CalendarWeek:update()
 end
 
 local ZmanimCalendar = InputContainer:new{
-    zmanim = nil,
-    monthTranslation = nil,
-    shortDayOfWeekTranslation = nil,
-    longDayOfWeekTranslation = nil,
     start_day_of_week = 1, -- 1-7 = Sunday-Saturday
     nb_book_spans = 3,
     font_face = "xx_smallinfofont",
@@ -295,7 +317,7 @@ local ZmanimCalendar = InputContainer:new{
     cur_month = nil,
     weekdays = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" } -- in Lua wday order
         -- (These do not need translations: they are the key into the provided
-        -- self.shortDayOfWeekTranslation and self.longDayOfWeekTranslation)
+        -- shortDayOfWeekTranslation and longDayOfWeekTranslation)
 }
 
 function ZmanimCalendar:init()
@@ -440,7 +462,7 @@ function ZmanimCalendar:init()
     self.day_names = HorizontalGroup:new{}
     for i = 0, 6 do
         local dayname = TextWidget:new{
-            text = self.shortDayOfWeekTranslation[self.weekdays[(self.start_day_of_week-1+i)%7 + 1]],
+            text = shortDayOfWeekTranslation[self.weekdays[(self.start_day_of_week-1+i)%7 + 1]],
             face = Font:getFace("xx_smallinfofont"),
             bold = true,
         }
@@ -527,7 +549,7 @@ function ZmanimCalendar:_populateItems()
         -- When hour is unspecified, Lua defaults to noon 12h00
     })
     -- Update title
-    local month_text = self.monthTranslation[os.date("%B", month_start_ts)] .. os.date(" %Y", month_start_ts)
+    local month_text = monthTranslation[os.date("%B", month_start_ts)] .. os.date(" %Y", month_start_ts)
     self.title_bar:setTitle(month_text)
     -- Update footer
     self.page_info_text:setText(self.cur_month)
@@ -588,7 +610,7 @@ function ZmanimCalendar:_populateItems()
             hour = 0,
         })
         local is_current_day =  day_s == today_s
-        local hdate = self.zmanim:tsToHdate(day_ts)
+        local hdate = ZmanimUtil:tsToHdate(day_ts)
         cur_week:addDay(CalendarDay:new{
             font_face = self.font_face,
             font_size = self.span_font_size,
@@ -600,13 +622,12 @@ function ZmanimCalendar:_populateItems()
             span_height = self.span_height,
             show_parent = self,
             hdate = hdate,
-            zmanim = self.zmanim,
             callback = function()
                 -- Just as ReaderStatistics:callbackDaily(), but without any window stacking
                 UIManager:show(KeyValuePage:new{
-                    title = self.zmanim:getDateString(hdate),
+                    title = ZmanimUtil:getDateString(hdate),
                     value_align = "right",
-                    kv_pairs = self.zmanim:getDay(hdate),
+                    kv_pairs = ZmanimUtil:getDay(hdate),
                     callback_return = function() end -- to just have that return button shown
                 })
             end

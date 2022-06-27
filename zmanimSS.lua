@@ -18,6 +18,7 @@ local TextWidget = require("ui/widget/textwidget")
 local VerticalGroup = require("ui/widget/verticalgroup")
 local VerticalSpan = require("ui/widget/verticalspan")
 local UIManager = require("ui/uimanager")
+local ZmanimUtil = require("zmanimutil")
 local Screen = Device.screen
 local ffi = require("ffi")
 
@@ -31,7 +32,6 @@ local ZmanimSS = InputContainer:new{
     content = nil,
     widget = nil,
     orig_rotation_mode = nil,
-    zmanim = nil,
     background = Blitbuffer.COLOR_LIGHT_GRAY,
     face = nil,
 }
@@ -70,7 +70,7 @@ function ZmanimSS:init()
 end
 
 function ZmanimSS:getZman(hdate, zman, text)
-    local result = libzmanim[zman](hdate, self.zmanim.location)
+    local result = libzmanim[zman](hdate, ZmanimUtil:getLocation())
     local zf = os.date("%l:%M", tonumber(libzmanim.hdatetime_t(result)))
     return {zf, text}
 end
@@ -89,7 +89,7 @@ end
 
 function ZmanimSS:genContent()
     self.content = {}
-    local hdate = self.zmanim:tsToHdate(os.time())
+    local hdate = ZmanimUtil:tsToHdate(os.time())
     -- @TODO Night rollover
 
     local zl = {}
@@ -122,7 +122,7 @@ function ZmanimSS:genContent()
         table.insert(zl, self:getShuir(hdate, "tehillim"))
     end
 
-    table.insert(self.content, self.zmanim:getDateString(hdate) .. self.zmanim:getYomtov(hdate))
+    table.insert(self.content, ZmanimUtil:getDateString(hdate) .. ZmanimUtil:getYomtov(hdate))
     local ziterator = #zl/2
     for k =1,ziterator do
         table.insert(self.content, {zl[ziterator+k], zl[k]})

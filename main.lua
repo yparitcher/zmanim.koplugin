@@ -14,12 +14,10 @@ local UIManager = require("ui/uimanager")
 local WidgetContainer = require("ui/widget/container/widgetcontainer")
 local LocationDialog = require("locationdialog")
 local ZmanimSS = require("zmanimSS")
+local ZmanimUtil = require("zmanimutil")
 local _ = require("gettext")
 local ffi = require("ffi")
-local C = ffi.C
 require("ffi/rtc_h")
-
-local cchar = ffi.typeof("char[?]")
 
 ffi.cdef[[
 char *getenv(const char *) __attribute__((__nothrow__, __leaf__));
@@ -49,7 +47,6 @@ shabbosends = { { func = "gettzaisbaalhatanya", desc = "6°"}, { func = "gettzai
 
 local Zmanim = WidgetContainer:new{
     name = "zmanim",
-    location = ffi.new("location"),
 }
 
 function Zmanim:onDispatcherRegisterActions()
@@ -60,7 +57,7 @@ end
 
 function Zmanim:init()
     self:onDispatcherRegisterActions()
-     self:setLocation(G_reader_settings:readSetting("zmanim_place",
+     ZmanimUtil:setLocation(G_reader_settings:readSetting("zmanim_place",
         {
         name = "NY",
         latitude = 40.66896,
@@ -70,21 +67,12 @@ function Zmanim:init()
     self.ui.menu:registerToMainMenu(self)
 end
 
-function Zmanim:setLocation(place, set_default)
-    self.location.latitude = place.latitude
-    self.location.longitude = place.longitude
-    ffi.C.setenv("TZ", place.timezone, 1)
-    if set_default then
-        G_reader_settings:saveSetting("zmanim_place", place)
-    end
-end
-
 function Zmanim:addToMainMenu(menu_items)
     menu_items.zmanim = {
         text = _("Zmanim calendar"),
         sorting_hint = "tools",
         callback = function() Zmanim:onShowZmanimCalendar() end,
-        hold_callback = function() UIManager:show(LocationDialog:new{zmanim = self,}) end,
+        hold_callback = function() UIManager:show(LocationDialog:new{}) end,
     }
 end
 
@@ -93,162 +81,22 @@ function Zmanim:onShowZmanimCalendar()
 end
 
 function Zmanim:onTodaysZmanim()
-    local hdate = Zmanim:tsToHdate(os.time())
+    local hdate = ZmanimUtil:tsToHdate(os.time())
     UIManager:show(KeyValuePage:new{
-        title = self:getDateString(hdate),
+        title = ZmanimUtil:getDateString(hdate),
         value_align = "right",
-        kv_pairs = self:getDay(hdate),
+        kv_pairs = ZmanimUtil:getDay(hdate),
         callback_return = function() end -- to just have that return button shown
     })
 end
 
-local shortDayOfWeekTranslation = {
-    ["Mon"] = _("Mon"),
-    ["Tue"] = _("Tue"),
-    ["Wed"] = _("Wed"),
-    ["Thu"] = _("Thu"),
-    ["Fri"] = _("Fri"),
-    ["Sat"] = _("Sat"),
-    ["Sun"] = _("Sun"),
-}
-
-local longDayOfWeekTranslation = {
-    ["Mon"] = _("Monday"),
-    ["Tue"] = _("Tuesday"),
-    ["Wed"] = _("Wednesday"),
-    ["Thu"] = _("Thursday"),
-    ["Fri"] = _("Friday"),
-    ["Sat"] = _("Saturday"),
-    ["Sun"] = _("Sunday"),
-}
-
-local monthTranslation = {
-    ["January"] = _("January"),
-    ["February"] = _("February"),
-    ["March"] = _("March"),
-    ["April"] = _("April"),
-    ["May"] = _("May"),
-    ["June"] = _("June"),
-    ["July"] = _("July"),
-    ["August"] = _("August"),
-    ["September"] = _("September"),
-    ["October"] = _("October"),
-    ["November"] = _("November"),
-    ["December"] = _("December"),
-}
-
 function Zmanim:getZmanimCalendar()
     local ZmanimCalendar = require("zmanimcalendar")
-    return ZmanimCalendar:new{
-        zmanim = self,
-        monthTranslation = monthTranslation,
-        shortDayOfWeekTranslation = shortDayOfWeekTranslation,
-        longDayOfWeekTranslation = longDayOfWeekTranslation,
-    }
-end
-
-function Zmanim:getZman(hdate, zman, text)
-    local result = libzmanim[zman](hdate, self.location)
-    local zf = os.date("%I:%M %p %Z", tonumber(libzmanim.hdatetime_t(result)))
-    return {zf, text}
-end
-
-function Zmanim:getShuir(hdate, shuir)
-    local cshuir = cchar(100)
-    libzmanim[shuir](hdate, cshuir)
-    local result = ffi.string(cshuir)
-    return {"", result}
-end
-
-function Zmanim:getDay(hdate)
-    local day = {}
-    local yt = self:getYomtov(hdate)
-    if yt ~= "" then
-        table.insert(day, {"", yt})
-        table.insert(day, "-")
-    end
-    table.insert(day, self:getZman(hdate, "getalosbaalhatanya", "עלות השחר"))
-    table.insert(day, self:getZman(hdate, "getmisheyakir10p2degrees", "משיכיר"))
-    table.insert(day, self:getZman(hdate, "getsunrise", "נץ החמה"))
-    table.insert(day, self:getZman(hdate, "getshmabaalhatanya", "סו״ז ק״ש"))
-    table.insert(day, self:getZman(hdate, "gettefilabaalhatanya", "סו״ז תפלה"))
-    if libzmanim.getyomtov(hdate) == libzmanim.EREV_PESACH then
-        table.insert(day, self:getZman(hdate, "getachilaschometzbaalhatanya", "סו״ז אכילת חמץ"))
-        table.insert(day, self:getZman(hdate, "getbiurchometzbaalhatanya", "סו״ז ביעור חמץ"))
-    end
-    table.insert(day, self:getZman(hdate, "getchatzosbaalhatanya", "חצות"))
-    table.insert(day, self:getZman(hdate, "getminchagedolabaalhatanya", "מנחה גדולה"))
-    table.insert(day, self:getZman(hdate, "getminchaketanabaalhatanya", "מנחה קטנה"))
-    table.insert(day, self:getZman(hdate, "getplagbaalhatanya", "פלג המנחה"))
-    if libzmanim.iscandlelighting(hdate) == 1 then
-        table.insert(day, self:getZman(hdate, "getcandlelighting", "הדלקת נרות"))
-    end
-    table.insert(day, self:getZman(hdate, "getsunset", "שקיעה"))
-    if libzmanim.iscandlelighting(hdate) == 2 then
-        table.insert(day, self:getZman(hdate, "gettzais8p5", "הדלקת נרות"))
-        table.insert(day, self:getZman(hdate, "gettzais8p5", "צאת הכוכבים"))
-    elseif libzmanim.isassurbemelachah(hdate) and hdate.wday ~= 6 then
-        if hdate.wday == 0 then
-            table.insert(day, self:getZman(hdate, "gettzais8p5", "יציאת השבת"))
-        else
-            table.insert(day, self:getZman(hdate, "gettzais8p5", "יציאת החג"))
-        end
-    else
-        table.insert(day, self:getZman(hdate, "gettzaisbaalhatanya", "צאת הכוכבים"))
-    end
-    table.insert(day, "-")
-    table.insert(day, self:getShuir(hdate, "chumash"))
-    table.insert(day, self:getShuir(hdate, "tehillim"))
-    table.insert(day, self:getShuir(hdate, "tanya"))
-    table.insert(day, self:getShuir(hdate, "rambam"))
---[[
-    for k, v in pairs(zmanlist) do
-        for l, w in ipairs(v) do
-            if w.def == true then
---require("logger").warn(w.func, w.desc)
-                --table.insert(day, self:getZman(hdate, w.func, w.desc))
-            end
-        end
-    end
-    --table.insert(day, self:getZman(hdate, "getshmabaalhatanya", "krias shema"))
---]]--
-    return day
-end
-
-function Zmanim:getParshah(hdate)
-    local parshah = libzmanim.parshahformat(libzmanim.getparshah(hdate))
-    return ffi.string(parshah)
-end
-
-function Zmanim:getYomtov(hdate)
-    local yomtov = libzmanim.yomtovformat(libzmanim.getyomtov(hdate))
-    return ffi.string(yomtov)
-end
-
-function Zmanim:getDate(hdate)
-    local date = cchar(7)
-    libzmanim.numtohchar(date, 6, hdate.day)
-    return ffi.string(date)
-end
-
-function Zmanim:getDateString(hdate)
-    local date = cchar(32)
-    libzmanim.hdateformat(date, 32, hdate)
-    return ffi.string(date)
-end
-
-function Zmanim:tsToHdate(ts)
-    local t = ffi.new("time_t[1]")
-    t[0] = ts
-    local tm = ffi.new("struct tm") -- luacheck: ignore
-    tm = C.localtime(t)
-    local hdate = libzmanim.convertDate(tm[0])
-    hdate.offset = tm[0].tm_gmtoff
-    return hdate
+    return ZmanimCalendar:new{}
 end
 
 function Zmanim:onZmanimSS()
-    UIManager:show(ZmanimSS:new{zmanim = self})
+    UIManager:show(ZmanimSS:new{})
 end
 
 return Zmanim

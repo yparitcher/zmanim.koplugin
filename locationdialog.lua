@@ -13,6 +13,7 @@ local Size = require("ui/size")
 local UIManager = require("ui/uimanager")
 local VerticalGroup = require("ui/widget/verticalgroup")
 local VerticalSpan = require("ui/widget/verticalspan")
+local ZmanimUtil = require("zmanimutil")
 local _ = require("gettext")
 local Screen = require("device").screen
 
@@ -60,7 +61,7 @@ function LocationDialog:init()
                 text = _("Select"),
                 is_enter_default = true,
                 callback = function()
-                    self.zmanim:setLocation(self.radio_button_table.checked_button.provider, true)
+                    ZmanimUtil:setLocation(self.radio_button_table.checked_button.provider, true)
                     UIManager:close(self)
                 end,
             },
