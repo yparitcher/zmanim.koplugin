@@ -109,6 +109,7 @@ end
 function Zmanim:onResume()
     if self.screensaverwidget then
         UIManager:close(self.screensaverwidget)
+        self.screensaverwidget = nil
     end
 end
 

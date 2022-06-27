@@ -11,6 +11,7 @@ local HorizontalGroup = require("ui/widget/horizontalgroup")
 local InputContainer = require("ui/widget/container/inputcontainer")
 --local LeftContainer = require("ui/widget/container/leftcontainer")
 local LineWidget = require("ui/widget/linewidget")
+local OverlapGroup = require("ui/widget/overlapgroup")
 local RightContainer = require("ui/widget/container/rightcontainer")
 local Size = require("ui/size")
 local TextBoxWidget = require("ui/widget/textboxwidget")
@@ -24,6 +25,8 @@ local ffi = require("ffi")
 
 local libzmanim = require("libzmanim_load")
 local cchar = ffi.typeof("char[?]")
+
+local FACE_NAME = "ezra"
 
 local ZmanimSS = InputContainer:new{
     name = "ZmanimSS",
@@ -145,11 +148,10 @@ function ZmanimSS:genContent()
 end
 
 function ZmanimSS:genWidget()
-    -- @TODO B"H
     local items = #self.content
     local item_height =  math.floor((self.height - (Size.line.thick * (items - 1))) / items)
     local half_width = math.floor((self.width - Size.line.thick) /2)
-    self.face = Font:getFace("ezra", 40) -- @TODO scaleBySize ?
+    self.face = Font:getFace(FACE_NAME, 40) -- Font size is already `scaleBySize` in `Font`
     local vg = VerticalGroup:new{}
     for k, v in ipairs(self.content) do
         if k ~= 1 then
@@ -216,14 +218,20 @@ function ZmanimSS:genWidget()
         end
         table.insert(vg, hg)
     end
-require("logger").warn("@@@", Screen:scaleBySize(19))
 
-    self.widget = CenterContainer:new{
-        dimen = Geom:new{
-            w = self.width,
-            h = self.height,
+    local dimen = Geom:new{w = self.width, h = self.height,}
+    self.widget = OverlapGroup:new{
+        dimen = dimen,
+        CenterContainer:new{
+            dimen = dimen,
+            vg
         },
-        vg
+        TextWidget:new{
+            text = 'ב"ה ',
+            face = Font:getFace(FACE_NAME, 10),
+            overlap_align = "right",
+            padding = Size.padding.tiny
+        }
     }
 end
 
@@ -279,11 +287,7 @@ function ZmanimSS:onCloseWidget()
     end
 
     UIManager:setDirty(nil, "full")
---[[--
-    -- Will come after the Resume event, iff screensaver_delay is set.
-    -- Comes *before* it otherwise.
-    UIManager:broadcastEvent(Event:new("OutOfScreenSaver"))
---]]--
+
 end
 
 return ZmanimSS
