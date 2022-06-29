@@ -56,6 +56,29 @@ function ZmanimUtil:tsToHdate(ts)
     return hdate
 end
 
+function ZmanimUtil:getNightfall(hdate)
+    if libzmanim.isassurbemelachah(hdate) then
+        return libzmanim.gettzais8p5(hdate, self:getLocation())
+    else
+        return libzmanim.gettzaisbaalhatanya(hdate, self:getLocation())
+    end
+end
+
+function ZmanimUtil:getNextDateChange()
+    local hdate = ZmanimUtil:tsToHdate(os.time())
+    local nextDate = libzmanim.getalosbaalhatanya(hdate, self:getLocation())
+    if libzmanim.hdatecompare(hdate, nextDate) ~= 1 then
+        nextDate = self:getNightfall(hdate)
+        if libzmanim.hdatecompare(hdate, nextDate) ~= 1 then
+            local newDate = ZmanimUtil:tsToHdate(os.time())
+            libzmanim.hdateaddday(newDate, 1)
+            nextDate = libzmanim.getalosbaalhatanya(newDate, self:getLocation())
+        end
+    end
+    local delta = (libzmanim.hdatetime_t(nextDate) - libzmanim.hdatetime_t(hdate)) + 15
+    return delta
+end
+
 function ZmanimUtil:getZman(hdate, zman, text)
     local result = libzmanim[zman](hdate, self.location)
     local zf = os.date("%I:%M %p %Z", tonumber(libzmanim.hdatetime_t(result)))

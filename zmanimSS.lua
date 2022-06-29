@@ -94,15 +94,10 @@ function ZmanimSS:genContent()
     self.content = {}
     local hdate = ZmanimUtil:tsToHdate(os.time())
     local day_string = ""
-    local night_func
-    if libzmanim.isassurbemelachah(hdate) then
-        night_func = "gettzais8p5"
-    else
-        night_func = "gettzaisbaalhatanya"
-    end
-    local night_zman = libzmanim[night_func](hdate, ZmanimUtil:getLocation())
-    if libzmanim.hdatecompare(hdate, night_zman) < 0 then
+    if libzmanim.hdatecompare(hdate, ZmanimUtil:getNightfall(hdate)) <= 0 then
         libzmanim.hdateaddday(hdate, 1)
+        day_string = "ליל "
+    elseif libzmanim.hdatecompare(hdate, libzmanim.getalosbaalhatanya(hdate, ZmanimUtil:getLocation())) > 0 then
         day_string = "ליל "
     end
 

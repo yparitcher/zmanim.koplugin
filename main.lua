@@ -8,6 +8,7 @@ if not libzmanim then
     return { disabled = true, }
 end
 
+local Device = require("device")
 local Dispatcher = require("dispatcher")
 local KeyValuePage = require("ui/widget/keyvaluepage")
 local UIManager = require("ui/uimanager")
@@ -99,18 +100,33 @@ function Zmanim:onZmanimSS()
     UIManager:show(ZmanimSS:new{})
 end
 
+function Zmanim:screensaverCallback()
+require("logger").warn("@@@ screensaver callback")
+    local screensaverwidget = ZmanimSS:new{}
+    UIManager:show(screensaverwidget)
+    if self.screensaverwidget then
+        UIManager:close(self.screensaverwidget)
+    end
+    self.screensaverwidget = screensaverwidget
+end
+
 function Zmanim:onSuspend()
+require("logger").warn("@@@ Suspend")
     if not self.screensaverwidget then
         self.screensaverwidget = ZmanimSS:new{}
         UIManager:show(self.screensaverwidget)
     end
+    Device.wakeup_mgr:addTask(5 * 60, self.screensaverCallback)
+    --Device.wakeup_mgr:addTask(ZmanimUtil:getNextDateChange(), self.screensaverCallback)
 end
 
 function Zmanim:onResume()
+require("logger").warn("@@@ Resume")
     if self.screensaverwidget then
         UIManager:close(self.screensaverwidget)
         self.screensaverwidget = nil
     end
+    Device.wakeup_mgr:removeTasks(nil, self.screensaverCallback)
 end
 
 return Zmanim
