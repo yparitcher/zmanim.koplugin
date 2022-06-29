@@ -48,6 +48,7 @@ shabbosends = { { func = "gettzaisbaalhatanya", desc = "6°"}, { func = "gettzai
 
 local Zmanim = WidgetContainer:new{
     name = "zmanim",
+    screensaverwidget = nil,
 }
 
 function Zmanim:onDispatcherRegisterActions()
@@ -107,32 +108,35 @@ end
 function Zmanim:_screensaverCallback()
 require("logger").warn("@@@ screensaver callback")
     Device.wakeup_mgr:removeTasks(nil, screensaverCallback)
-    if self.screensaverwidget then
-        UIManager:close(self.screensaverwidget)
+    if Zmanim.screensaverwidget then
+require("logger").warn("@@@ callback closing widget")
+        UIManager:close(Zmanim.screensaverwidget)
+Zmanim.screensaverwidget = nil
     end
-    self.screensaverwidget = ZmanimSS:new{}
-    UIManager:show(self.screensaverwidget)
-    Device.wakeup_mgr:addTask(5 * 60, screensaverCallback)
+    Zmanim.screensaverwidget = ZmanimSS:new{}
+    UIManager:show(Zmanim.screensaverwidget)
+    Device.wakeup_mgr:addTask(3 * 60, screensaverCallback)
     --Device.wakeup_mgr:addTask(ZmanimUtil:getNextDateChange(), screensaverCallback)
 end
 
 function Zmanim:onSuspend()
 require("logger").warn("@@@ Suspend")
-    if not self.screensaverwidget then
-        self.screensaverwidget = ZmanimSS:new{}
-        UIManager:show(self.screensaverwidget)
+    if not Zmanim.screensaverwidget then
+        Zmanim.screensaverwidget = ZmanimSS:new{}
+        UIManager:show(Zmanim.screensaverwidget)
     end
-    Device.wakeup_mgr:addTask(1 * 60, screensaverCallback)
+    Device.wakeup_mgr:addTask(3 * 60, screensaverCallback)
     --Device.wakeup_mgr:addTask(ZmanimUtil:getNextDateChange(), screensaverCallback)
 end
 
 function Zmanim:onResume()
 require("logger").warn("@@@ Resume")
-    if self.screensaverwidget then
-        UIManager:close(self.screensaverwidget)
-        self.screensaverwidget = nil
+    if Zmanim.screensaverwidget then
+require("logger").warn("@@@ resume close widget")
+        UIManager:close(Zmanim.screensaverwidget)
+        Zmanim.screensaverwidget = nil
     end
-    Device.wakeup_mgr:removeTasks(nil, self.screensaverCallback)
+    Device.wakeup_mgr:removeTasks(nil, screensaverCallback)
 end
 
 return Zmanim
