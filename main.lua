@@ -107,16 +107,14 @@ end
 
 function Zmanim:_screensaverCallback()
 require("logger").warn("@@@ screensaver callback")
-    Device.wakeup_mgr:removeTasks(nil, screensaverCallback)
     if Zmanim.screensaverwidget then
-require("logger").warn("@@@ callback closing widget")
         UIManager:close(Zmanim.screensaverwidget)
-Zmanim.screensaverwidget = nil
+        Zmanim.screensaverwidget = nil
     end
     Zmanim.screensaverwidget = ZmanimSS:new{}
     UIManager:show(Zmanim.screensaverwidget)
-    Device.wakeup_mgr:addTask(3 * 60, screensaverCallback)
-    --Device.wakeup_mgr:addTask(ZmanimUtil:getNextDateChange(), screensaverCallback)
+   --Device.wakeup_mgr:addTask(8 * 60, screensaverCallback)
+    Device.wakeup_mgr:addTask(ZmanimUtil:getNextDateChange(), screensaverCallback)
 end
 
 function Zmanim:onSuspend()
@@ -125,14 +123,13 @@ require("logger").warn("@@@ Suspend")
         Zmanim.screensaverwidget = ZmanimSS:new{}
         UIManager:show(Zmanim.screensaverwidget)
     end
-    Device.wakeup_mgr:addTask(3 * 60, screensaverCallback)
-    --Device.wakeup_mgr:addTask(ZmanimUtil:getNextDateChange(), screensaverCallback)
+    --Device.wakeup_mgr:addTask(3 * 60, screensaverCallback)
+    Device.wakeup_mgr:addTask(ZmanimUtil:getNextDateChange(), screensaverCallback)
 end
 
 function Zmanim:onResume()
 require("logger").warn("@@@ Resume")
     if Zmanim.screensaverwidget then
-require("logger").warn("@@@ resume close widget")
         UIManager:close(Zmanim.screensaverwidget)
         Zmanim.screensaverwidget = nil
     end
