@@ -102,12 +102,15 @@ end
 
 function Zmanim:screensaverCallback()
 require("logger").warn("@@@ screensaver callback")
+    Device.wakeup_mgr:removeTasks(nil, self.screensaverCallback)
     local screensaverwidget = ZmanimSS:new{}
     UIManager:show(screensaverwidget)
     if self.screensaverwidget then
         UIManager:close(self.screensaverwidget)
     end
     self.screensaverwidget = screensaverwidget
+    Device.wakeup_mgr:addTask(5 * 60, self.screensaverCallback)
+    --Device.wakeup_mgr:addTask(ZmanimUtil:getNextDateChange(), self.screensaverCallback)
 end
 
 function Zmanim:onSuspend()
