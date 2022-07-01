@@ -71,10 +71,29 @@ end
 
 function Zmanim:addToMainMenu(menu_items)
     menu_items.zmanim = {
-        text = _("Zmanim calendar"),
+        text = _("Zmanim"),
         sorting_hint = "tools",
-        callback = function() Zmanim:onShowZmanimCalendar() end,
-        hold_callback = function() UIManager:show(LocationDialog:new{}) end,
+        sub_item_table = {
+        {
+            text = _("Zmanim calendar"),
+            callback = function() Zmanim:onShowZmanimCalendar() end,
+        },
+        {
+            text = _("Todays Zmanim"),
+            callback = function() Zmanim:onTodaysZmanim() end,
+            separator = true,
+        },
+        {
+            text = _("Zmanim screensaver"),
+            checked_func = function() return G_reader_settings:isTrue("zmanim_screensaver") end,
+            callback = function() G_reader_settings:flipNilOrFalse("zmanim_screensaver") end,
+            separator = true,
+        },
+        {
+            text = _("Zmanim location"),
+            callback = function() UIManager:show(LocationDialog:new{}) end,
+        },
+        }
     }
 end
 
@@ -119,21 +138,24 @@ end
 
 function Zmanim:onSuspend()
 require("logger").warn("@@@ Suspend")
-    if not Zmanim.screensaverwidget then
-        Zmanim.screensaverwidget = ZmanimSS:new{}
-        UIManager:show(Zmanim.screensaverwidget)
+    if G_reader_settings:isTrue("zmanim_screensaver") and Device.wakeup_mgr then
+        if not Zmanim.screensaverwidget then
+            Zmanim.screensaverwidget = ZmanimSS:new{}
+            UIManager:show(Zmanim.screensaverwidget)
+        end
+        --Device.wakeup_mgr:addTask(3 * 60, screensaverCallback)
+        Device.wakeup_mgr:addTask(ZmanimUtil:getNextDateChange(), screensaverCallback)
     end
-    --Device.wakeup_mgr:addTask(3 * 60, screensaverCallback)
-    Device.wakeup_mgr:addTask(ZmanimUtil:getNextDateChange(), screensaverCallback)
 end
 
 function Zmanim:onResume()
-require("logger").warn("@@@ Resume")
-    if Zmanim.screensaverwidget then
-        UIManager:close(Zmanim.screensaverwidget)
+    if G_reader_settings:isTrue("zmanim_screensaver") and Device.wakeup_mgr then
+        if Zmanim.screensaverwidget then
+            UIManager:close(Zmanim.screensaverwidget)
         Zmanim.screensaverwidget = nil
+        end
+        Device.wakeup_mgr:removeTasks(nil, screensaverCallback)
     end
-    Device.wakeup_mgr:removeTasks(nil, screensaverCallback)
 end
 
 return Zmanim
