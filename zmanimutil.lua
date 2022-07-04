@@ -80,7 +80,7 @@ function ZmanimUtil:getNextDateChange()
     return delta
 end
 
-function ZmanimUtil:getZman(hdate, zman, text)
+function ZmanimUtil:getZman(hdate, zman, text, round)
     local result = libzmanim[zman](hdate, self.location)
     local zf = os.date("%I:%M %p %Z", tonumber(libzmanim.hdatetime_t(result)))
     return {zf, text}
@@ -93,7 +93,7 @@ function ZmanimUtil:getShuir(hdate, shuir)
     return {"", result}
 end
 
-function ZmanimUtil:getDay(hdate)
+function ZmanimUtil:getDay(hdate, round)
     local day = {}
     local yt = self:getYomtov(hdate)
     if yt ~= "" then
@@ -101,8 +101,8 @@ function ZmanimUtil:getDay(hdate)
         table.insert(day, "-")
     end
     table.insert(day, self:getZman(hdate, "getalosbaalhatanya", "עלות השחר"))
-    table.insert(day, self:getZman(hdate, "getmisheyakir10p2degrees", "משיכיר"))
-    table.insert(day, self:getZman(hdate, "getsunrise", "נץ החמה"))
+    table.insert(day, self:getZman(hdate, "getmisheyakir10p2degrees", "משיכיר", round))
+    table.insert(day, self:getZman(hdate, "getsunrise", "נץ החמה", round))
     table.insert(day, self:getZman(hdate, "getshmabaalhatanya", "סו״ז ק״ש"))
     table.insert(day, self:getZman(hdate, "gettefilabaalhatanya", "סו״ז תפלה"))
     if libzmanim.getyomtov(hdate) == libzmanim.EREV_PESACH then
@@ -110,24 +110,24 @@ function ZmanimUtil:getDay(hdate)
         table.insert(day, self:getZman(hdate, "getbiurchometzbaalhatanya", "סו״ז ביעור חמץ"))
     end
     table.insert(day, self:getZman(hdate, "getchatzosbaalhatanya", "חצות"))
-    table.insert(day, self:getZman(hdate, "getminchagedolabaalhatanya", "מנחה גדולה"))
-    table.insert(day, self:getZman(hdate, "getminchaketanabaalhatanya", "מנחה קטנה"))
-    table.insert(day, self:getZman(hdate, "getplagbaalhatanya", "פלג המנחה"))
+    table.insert(day, self:getZman(hdate, "getminchagedolabaalhatanya", "מנחה גדולה", round))
+    table.insert(day, self:getZman(hdate, "getminchaketanabaalhatanya", "מנחה קטנה", round))
+    table.insert(day, self:getZman(hdate, "getplagbaalhatanya", "פלג המנחה", round))
     if libzmanim.iscandlelighting(hdate) == 1 then
         table.insert(day, self:getZman(hdate, "getcandlelighting", "הדלקת נרות"))
     end
     table.insert(day, self:getZman(hdate, "getsunset", "שקיעה"))
     if libzmanim.iscandlelighting(hdate) == 2 then
         table.insert(day, self:getZman(hdate, "gettzais8p5", "הדלקת נרות"))
-        table.insert(day, self:getZman(hdate, "gettzais8p5", "צאת הכוכבים"))
+        table.insert(day, self:getZman(hdate, "gettzais8p5", "צאת הכוכבים", round))
     elseif libzmanim.isassurbemelachah(hdate) and hdate.wday ~= 6 then
         if hdate.wday == 0 then
-            table.insert(day, self:getZman(hdate, "gettzais8p5", "יציאת השבת"))
+            table.insert(day, self:getZman(hdate, "gettzais8p5", "יציאת השבת", round))
         else
-            table.insert(day, self:getZman(hdate, "gettzais8p5", "יציאת החג"))
+            table.insert(day, self:getZman(hdate, "gettzais8p5", "יציאת החג", round))
         end
     else
-        table.insert(day, self:getZman(hdate, "gettzaisbaalhatanya", "צאת הכוכבים"))
+        table.insert(day, self:getZman(hdate, "gettzaisbaalhatanya", "צאת הכוכבים", round))
     end
     table.insert(day, "-")
     table.insert(day, self:getShuir(hdate, "chumash"))

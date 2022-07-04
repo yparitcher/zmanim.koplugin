@@ -49,6 +49,7 @@ shabbosends = { { func = "gettzaisbaalhatanya", desc = "6°"}, { func = "gettzai
 local Zmanim = WidgetContainer:new{
     name = "zmanim",
     screensaverwidget = nil,
+    round = nil,
 }
 
 function Zmanim:onDispatcherRegisterActions()
@@ -66,6 +67,7 @@ function Zmanim:init()
         longitude = -73.94284,
         timezone = "EST5EDT,M3.2.0/2:00:00,M11.1.0/2:00:00",
         }), false)
+    self.round = G_reader_settings:nilOrTrue("zmanim_rounding")
     self.ui.menu:registerToMainMenu(self)
 end
 
@@ -87,6 +89,14 @@ function Zmanim:addToMainMenu(menu_items)
             text = _("Zmanim screensaver"),
             checked_func = function() return G_reader_settings:isTrue("zmanim_screensaver") end,
             callback = function() G_reader_settings:flipNilOrFalse("zmanim_screensaver") end,
+        },
+        {
+            text = _("Round Zmanim"),
+            checked_func = function() return G_reader_settings:nilOrTrue("zmanim_rounding") end,
+            callback = function()
+                G_reader_settings:toggle("zmanim_rounding")
+                self.round = G_reader_settings:nilOrTrue("zmanim_rounding")
+            end,
             separator = true,
         },
         {
@@ -106,18 +116,18 @@ function Zmanim:onTodaysZmanim()
     UIManager:show(KeyValuePage:new{
         title = ZmanimUtil:getDateString(hdate),
         value_align = "right",
-        kv_pairs = ZmanimUtil:getDay(hdate),
+        kv_pairs = ZmanimUtil:getDay(hdate, self.round),
         callback_return = function() end -- to just have that return button shown
     })
 end
 
 function Zmanim:getZmanimCalendar()
     local ZmanimCalendar = require("zmanimcalendar")
-    return ZmanimCalendar:new{}
+    return ZmanimCalendar:new{round=self.round}
 end
 
 function Zmanim:onZmanimSS()
-    UIManager:show(ZmanimSS:new{})
+    UIManager:show(ZmanimSS:new{round=self.round})
 end
 
 local function screensaverCallback()
@@ -130,7 +140,7 @@ require("logger").info("@@@ screensaver callback")
         UIManager:close(Zmanim.screensaverwidget)
         Zmanim.screensaverwidget = nil
     end
-    Zmanim.screensaverwidget = ZmanimSS:new{}
+    Zmanim.screensaverwidget = ZmanimSS:new{round=self.round}
     UIManager:show(Zmanim.screensaverwidget)
     --Device.wakeup_mgr:addTask(8 * 60, screensaverCallback)
     Device.wakeup_mgr:addTask(ZmanimUtil:getNextDateChange(), screensaverCallback)
@@ -140,7 +150,7 @@ function Zmanim:onSuspend()
 require("logger").info("@@@ Suspend")
     if G_reader_settings:isTrue("zmanim_screensaver") and Device.wakeup_mgr then
         if not Zmanim.screensaverwidget then
-            Zmanim.screensaverwidget = ZmanimSS:new{}
+            Zmanim.screensaverwidget = ZmanimSS:new{round=self.round}
             UIManager:show(Zmanim.screensaverwidget)
         end
         --Device.wakeup_mgr:addTask(3 * 60, screensaverCallback)

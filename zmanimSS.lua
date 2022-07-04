@@ -37,6 +37,7 @@ local ZmanimSS = InputContainer:new{
     orig_rotation_mode = nil,
     background = Blitbuffer.COLOR_LIGHT_GRAY,
     face = nil,
+    round = nil,
 }
 
 function ZmanimSS:init()
@@ -72,8 +73,11 @@ function ZmanimSS:init()
     self:update()
 end
 
-function ZmanimSS:getZman(hdate, zman, text)
+function ZmanimSS:getZman(hdate, zman, text, round)
     local result = libzmanim[zman](hdate, ZmanimUtil:getLocation())
+    if round then
+        libzmanim.hdateaddsecond(result, 60-result.sec)
+    end
     local zf = os.date("%l:%M", tonumber(libzmanim.hdatetime_t(result)))
     return {zf, text}
 end
@@ -103,29 +107,29 @@ function ZmanimSS:genContent()
 
     local zl = {}
     table.insert(zl, self:getZman(hdate, "getalosbaalhatanya", "עלות"))
-    table.insert(zl, self:getZman(hdate, "getmisheyakir10p2degrees", "משיכיר"))
-    table.insert(zl, self:getZman(hdate, "getsunrise", "נץ החמה"))
+    table.insert(zl, self:getZman(hdate, "getmisheyakir10p2degrees", "משיכיר", self.round))
+    table.insert(zl, self:getZman(hdate, "getsunrise", "נץ החמה", self.round))
     table.insert(zl, self:getZman(hdate, "getshmabaalhatanya", "קריאת שמע"))
     table.insert(zl, self:getZman(hdate, "gettefilabaalhatanya", "תפלה"))
     table.insert(zl, self:getZman(hdate, "getchatzosbaalhatanya", "חצות"))
-    table.insert(zl, self:getZman(hdate, "getminchagedolabaalhatanya", "מנחה גדולה"))
-    table.insert(zl, self:getZman(hdate, "getminchaketanabaalhatanya", "מנחה קטנה"))
-    table.insert(zl, self:getZman(hdate, "getplagbaalhatanya", "פלג המנחה"))
+    table.insert(zl, self:getZman(hdate, "getminchagedolabaalhatanya", "מנחה גדולה", self.round))
+    table.insert(zl, self:getZman(hdate, "getminchaketanabaalhatanya", "מנחה קטנה", self.round))
+    table.insert(zl, self:getZman(hdate, "getplagbaalhatanya", "פלג המנחה", self.round))
     if libzmanim.iscandlelighting(hdate) == 1 then
         table.insert(zl, self:getZman(hdate, "getcandlelighting", "הדלקת נרות"))
     end
     table.insert(zl, self:getZman(hdate, "getsunset", "שקיעה"))
     if libzmanim.iscandlelighting(hdate) == 2 then
         table.insert(zl, self:getZman(hdate, "gettzais8p5", "הדלקת נרות"))
-        table.insert(zl, self:getZman(hdate, "gettzais8p5", "צאת"))
+        table.insert(zl, self:getZman(hdate, "gettzais8p5", "צאת", self.round))
     elseif libzmanim.isassurbemelachah(hdate) and hdate.wday ~= 6 then
         if hdate.wday == 0 then
-            table.insert(zl, self:getZman(hdate, "gettzais8p5", "יציאת השבת"))
+            table.insert(zl, self:getZman(hdate, "gettzais8p5", "יציאת השבת", self.round))
         else
-            table.insert(zl, self:getZman(hdate, "gettzais8p5", "יציאת החג"))
+            table.insert(zl, self:getZman(hdate, "gettzais8p5", "יציאת החג", self.round))
         end
     else
-        table.insert(zl, self:getZman(hdate, "gettzaisbaalhatanya", "צאת"))
+        table.insert(zl, self:getZman(hdate, "gettzaisbaalhatanya", "צאת", self.round))
     end
     if #zl %2 == 1 then --odd
         table.insert(zl, self:getShuir(hdate, "tehillim"))
