@@ -16,9 +16,9 @@ local RightContainer = require("ui/widget/container/rightcontainer")
 local Size = require("ui/size")
 local TextBoxWidget = require("ui/widget/textboxwidget")
 local TextWidget = require("ui/widget/textwidget")
+local UIManager = require("ui/uimanager")
 local VerticalGroup = require("ui/widget/verticalgroup")
 local VerticalSpan = require("ui/widget/verticalspan")
-local UIManager = require("ui/uimanager")
 local ZmanimUtil = require("zmanimutil")
 local Screen = Device.screen
 local ffi = require("ffi")
@@ -148,10 +148,11 @@ end
 
 function ZmanimSS:genWidget()
     local items = #self.content
-    local item_height =  math.floor((self.height - (Size.line.thick * (items - 1))) / items)
+    local item_height =  math.floor((self.height - ((Size.line.thick * (items - 1))+ (Size.padding.default*2))) / items)
     local half_width = math.floor((self.width - Size.line.thick) /2)
     self.face = Font:getFace(FACE_NAME, 40) -- Font size is already `scaleBySize` in `Font`
     local vg = VerticalGroup:new{}
+    table.insert(vg, VerticalSpan:new{width = Size.padding.default})
     for k, v in ipairs(self.content) do
         if k ~= 1 then
             table.insert(vg,
@@ -203,7 +204,7 @@ function ZmanimSS:genWidget()
                 })
             end
         else
-            table.insert(hg, VerticalSpan:new{width = item_height})
+            --table.insert(hg, VerticalSpan:new{width = item_height})
             table.insert(hg,
                 TextBoxWidget:new{
                     text = v,
@@ -213,10 +214,13 @@ function ZmanimSS:genWidget()
                     width = self.width,
                     alignment = "center",
                     bgcolor = self.background,
+                    height = item_height,
+                    height_adjust = true,
                 })
         end
         table.insert(vg, hg)
     end
+    table.insert(vg, VerticalSpan:new{width = Size.padding.default})
 
     local dimen = Geom:new{w = self.width, h = self.height,}
     self.widget = OverlapGroup:new{
