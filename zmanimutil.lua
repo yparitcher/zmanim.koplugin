@@ -65,7 +65,8 @@ function ZmanimUtil:getNightfall(hdate)
 end
 
 function ZmanimUtil:getNextDateChange()
-    local hdate = ZmanimUtil:tsToHdate(os.time())
+    local now = os.time()
+    local hdate = ZmanimUtil:tsToHdate(now)
     local nextDate = libzmanim.getalosbaalhatanya(hdate, self:getLocation())
     if libzmanim.hdatecompare(hdate, nextDate) ~= 1 then
         nextDate = self:getNightfall(hdate)
@@ -75,7 +76,7 @@ function ZmanimUtil:getNextDateChange()
             nextDate = libzmanim.getalosbaalhatanya(newDate, self:getLocation())
         end
     end
-    local delta = (libzmanim.hdatetime_t(nextDate) - libzmanim.hdatetime_t(hdate)) + 15
+    local delta = libzmanim.hdatetime_t(nextDate) - now
     return delta
 end
 

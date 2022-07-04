@@ -125,19 +125,19 @@ local function screensaverCallback()
 end
 
 function Zmanim:_screensaverCallback()
-require("logger").warn("@@@ screensaver callback")
+require("logger").info("@@@ screensaver callback")
     if Zmanim.screensaverwidget then
         UIManager:close(Zmanim.screensaverwidget)
         Zmanim.screensaverwidget = nil
     end
     Zmanim.screensaverwidget = ZmanimSS:new{}
     UIManager:show(Zmanim.screensaverwidget)
-   --Device.wakeup_mgr:addTask(8 * 60, screensaverCallback)
+    --Device.wakeup_mgr:addTask(8 * 60, screensaverCallback)
     Device.wakeup_mgr:addTask(ZmanimUtil:getNextDateChange(), screensaverCallback)
 end
 
 function Zmanim:onSuspend()
-require("logger").warn("@@@ Suspend")
+require("logger").info("@@@ Suspend")
     if G_reader_settings:isTrue("zmanim_screensaver") and Device.wakeup_mgr then
         if not Zmanim.screensaverwidget then
             Zmanim.screensaverwidget = ZmanimSS:new{}

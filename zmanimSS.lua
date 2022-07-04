@@ -222,7 +222,7 @@ function ZmanimSS:genWidget()
             vg
         },
         TextWidget:new{
-            text = 'ב"ה ',
+            text = 'ב"ה ', --.. os.date("%T", os.time()),
             face = Font:getFace(FACE_NAME, 10),
             overlap_align = "right",
             padding = Size.padding.tiny
