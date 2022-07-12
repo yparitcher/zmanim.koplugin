@@ -50,6 +50,7 @@ local Zmanim = WidgetContainer:new{
     name = "zmanim",
     screensaverwidget = nil,
     round = nil,
+    orig_rotation_mode = nil,
 }
 
 function Zmanim:onDispatcherRegisterActions()
@@ -149,12 +150,13 @@ end
 function Zmanim:onSuspend()
 require("logger").info("@@@ Suspend")
     if G_reader_settings:isTrue("zmanim_screensaver") and Device.wakeup_mgr then
-        if not Zmanim.screensaverwidget then
-            Zmanim.screensaverwidget = ZmanimSS:new{round=self.round}
-            UIManager:show(Zmanim.screensaverwidget)
+        self.orig_rotation_mode = Screen:getRotationMode()
+        if bit.band(self.orig_rotation_mode, 1) ~= 1 then
+            Screen:setRotationMode(Screen.ORIENTATION_LANDSCAPE_ROTATED)
+        else
+            self.orig_rotation_mode = nil
         end
-        --Device.wakeup_mgr:addTask(3 * 60, screensaverCallback)
-        Device.wakeup_mgr:addTask(ZmanimUtil:getNextDateChange(), screensaverCallback)
+        screensaverCallback()
     end
 end
 
@@ -165,6 +167,12 @@ function Zmanim:onResume()
         Zmanim.screensaverwidget = nil
         end
         Device.wakeup_mgr:removeTasks(nil, screensaverCallback)
+        -- Restore to previous rotation mode, if need be.
+        if self.orig_rotation_mode then
+            Screen:setRotationMode(self.orig_rotation_mode)
+            self.orig_rotation_mode = nil
+        end
+        UIManager:setDirty(nil, "full")
     end
 end
 

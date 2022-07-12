@@ -34,20 +34,12 @@ local ZmanimSS = InputContainer:new{
     modal = true,
     content = nil,
     widget = nil,
-    orig_rotation_mode = nil,
     background = Blitbuffer.COLOR_LIGHT_GRAY,
     face = nil,
     round = nil,
 }
 
 function ZmanimSS:init()
-    self.orig_rotation_mode = Screen:getRotationMode()
-    if bit.band(self.orig_rotation_mode, 1) ~= 1 then
-        Screen:setRotationMode(Screen.ORIENTATION_LANDSCAPE_ROTATED)
-    else
-        self.orig_rotation_mode = nil
-    end
-
     if Device:hasKeys() then
         self.key_events = {
             Close = { {Device.input.group.Back}, doc = "close widget" },
@@ -255,14 +247,6 @@ function ZmanimSS:update()
         self.widget,
     }
     self[1] = self.main_frame
-    UIManager:setDirty(self, "full")
-end
-
-function ZmanimSS:onShow()
-    UIManager:setDirty(self, function()
-        return "full", self.main_frame.dimen
-    end)
-    return true
 end
 
 function ZmanimSS:onTap(_, ges)
@@ -280,17 +264,6 @@ end
 function ZmanimSS:onAnyKeyPressed()
     self:onClose()
     return true
-end
-
-function ZmanimSS:onCloseWidget()
-    -- Restore to previous rotation mode, if need be.
-    if self.orig_rotation_mode then
-        Screen:setRotationMode(self.orig_rotation_mode)
-        self.orig_rotation_mode = nil
-    end
-
-    UIManager:setDirty(nil, "full")
-
 end
 
 return ZmanimSS
