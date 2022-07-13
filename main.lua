@@ -17,6 +17,7 @@ local LocationDialog = require("locationdialog")
 local ZmanimSS = require("zmanimSS")
 local ZmanimUtil = require("zmanimutil")
 local _ = require("gettext")
+local Screen = Device.screen
 local ffi = require("ffi")
 require("ffi/rtc_h")
 
