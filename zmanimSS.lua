@@ -60,8 +60,6 @@ function ZmanimSS:init()
 
     self:genContent()
     self:genWidget()
-    Screen:clear()
-    Screen:refreshFull()
     self:update()
 end
 

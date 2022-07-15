@@ -143,7 +143,7 @@ require("logger").info("@@@ screensaver callback")
         Zmanim.screensaverwidget = nil
     end
     Zmanim.screensaverwidget = ZmanimSS:new{round=self.round}
-    UIManager:show(Zmanim.screensaverwidget)
+    UIManager:show(Zmanim.screensaverwidget, "full")
     --Device.wakeup_mgr:addTask(8 * 60, screensaverCallback)
     Device.wakeup_mgr:addTask(ZmanimUtil:getNextDateChange(), screensaverCallback)
 end
