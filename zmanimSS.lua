@@ -125,7 +125,11 @@ function ZmanimSS:genContent()
         table.insert(zl, self:getShuir(hdate, "tehillim"))
     end
 
-    day_string = day_string .. ZmanimUtil:getDateString(hdate) .. ZmanimUtil:getYomtov(hdate)
+    day_string = day_string .. ZmanimUtil:getDateString(hdate)
+    local yt = ZmanimUtil:getYomtov(hdate)
+    if yt ~= "" then
+        day_string = day_string .." - " .. yt
+    end
     table.insert(self.content, day_string)
     local ziterator = #zl/2
     for k =1,ziterator do
