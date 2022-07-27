@@ -109,6 +109,7 @@ function ZmanimUtil:genLocationTable()
         {
             text = _("New Location"),
             callback = function(touchmenu_instance) ZmanimUtil:newPlace() end,
+            separator = true,
         },
     }
     for k, v in pairs(self.places.data) do
