@@ -13,11 +13,11 @@ local Dispatcher = require("dispatcher")
 local KeyValuePage = require("ui/widget/keyvaluepage")
 local UIManager = require("ui/uimanager")
 local WidgetContainer = require("ui/widget/container/widgetcontainer")
-local LocationDialog = require("locationdialog")
 local ZmanimSS = require("zmanimSS")
 local ZmanimUtil = require("zmanimutil")
 local _ = require("gettext")
 local Screen = Device.screen
+local T = require("ffi/util").template
 local ffi = require("ffi")
 require("ffi/rtc_h")
 
@@ -61,13 +61,7 @@ end
 
 function Zmanim:init()
     self:onDispatcherRegisterActions()
-     ZmanimUtil:setLocation(G_reader_settings:readSetting("zmanim_place",
-        {
-        name = "NY",
-        latitude = 40.66896,
-        longitude = -73.94284,
-        timezone = "EST5EDT,M3.2.0/2:00:00,M11.1.0/2:00:00",
-        }), false)
+    ZmanimUtil:setPlace(ZmanimUtil:getPlace())
     self.ui.menu:registerToMainMenu(self)
 end
 
@@ -97,8 +91,8 @@ function Zmanim:addToMainMenu(menu_items)
             separator = true,
         },
         {
-            text = _("Zmanim location"),
-            callback = function() UIManager:show(LocationDialog:new{}) end,
+            text_func = function() return T(_("Zmanim location (%1)"), ZmanimUtil:getPlace() or _("Default")) end,
+            sub_item_table_func = function() return ZmanimUtil:genLocationTable() end,
         },
         }
     }
