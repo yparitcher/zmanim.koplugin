@@ -24,6 +24,14 @@ function ZmanimUtil:getLocation()
     return self.location
 end
 
+function ZmanimUtil:toggleRound()
+    G_reader_settings:flipFalse("zmanim_rounding")
+end
+
+function ZmanimUtil:getRound()
+    return G_reader_settings:nilOrTrue("zmanim_rounding")
+end
+
 function ZmanimUtil:getParshah(hdate)
     local parshah = libzmanim.parshahformat(libzmanim.getparshah(hdate))
     return ffi.string(parshah)
@@ -82,6 +90,9 @@ end
 
 function ZmanimUtil:getZman(hdate, zman, text, round)
     local result = libzmanim[zman](hdate, self.location)
+    if round then
+        libzmanim.hdateaddsecond(result, 60-result.sec)
+    end
     local zf = os.date("%I:%M %p %Z", tonumber(libzmanim.hdatetime_t(result)))
     return {zf, text}
 end
@@ -93,7 +104,8 @@ function ZmanimUtil:getShuir(hdate, shuir)
     return {"", result}
 end
 
-function ZmanimUtil:getDay(hdate, round)
+function ZmanimUtil:getDay(hdate)
+    local round = ZmanimUtil:getRound()
     local day = {}
     local yt = self:getYomtov(hdate)
     if yt ~= "" then

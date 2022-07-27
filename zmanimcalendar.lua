@@ -315,7 +315,6 @@ local ZmanimCalendar = InputContainer:new{
     width = nil,
     height = nil,
     cur_month = nil,
-    round = nil,
     weekdays = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" } -- in Lua wday order
         -- (These do not need translations: they are the key into the provided
         -- shortDayOfWeekTranslation and longDayOfWeekTranslation)
@@ -628,7 +627,7 @@ function ZmanimCalendar:_populateItems()
                 UIManager:show(KeyValuePage:new{
                     title = ZmanimUtil:getDateString(hdate),
                     value_align = "right",
-                    kv_pairs = ZmanimUtil:getDay(hdate, self.round),
+                    kv_pairs = ZmanimUtil:getDay(hdate),
                     callback_return = function() end -- to just have that return button shown
                 })
             end
