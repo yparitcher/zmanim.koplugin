@@ -144,7 +144,8 @@ function ZmanimSS:genWidget()
     local items = #self.content
     local item_height =  math.floor((self.height - ((Size.line.thick * (items - 1))+ (Size.padding.default*2))) / items)
     local half_width = math.floor((self.width - Size.line.thick) /2)
-    self.face = Font:getFace(FACE_NAME, 40) -- Font size is already `scaleBySize` in `Font`
+    -- Font size is already `scaleBySize` in `Font`
+    self.face = Font:getFace(FACE_NAME, 40) or Font:getFace("cfont", 40)
     local vg = VerticalGroup:new{}
     table.insert(vg, VerticalSpan:new{width = Size.padding.default})
     for k, v in ipairs(self.content) do
@@ -225,7 +226,7 @@ function ZmanimSS:genWidget()
         },
         TextWidget:new{
             text = 'ב"ה ', --.. os.date("%T", os.time()),
-            face = Font:getFace(FACE_NAME, 10),
+            face = Font:getFace(FACE_NAME, 10) or Font:getFace("cfont", 10) ,
             overlap_align = "right",
             padding = Size.padding.tiny
         }
