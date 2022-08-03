@@ -69,6 +69,7 @@ function ZmanimUtil:newPlace()
             {
                 description = _("Time zone"),
                 hint = "EST5EDT,M3.2.0/2:00:00,M11.1.0/2:00:00",
+                text = "EST5EDT,M3.2.0/2:00:00,M11.1.0/2:00:00",
             },
         },
         buttons = {{
