@@ -34,7 +34,7 @@ local ZmanimSS = InputContainer:new{
     modal = true,
     content = nil,
     widget = nil,
-    background = Blitbuffer.WHITE,
+    background = Blitbuffer.COLOR_LIGHT_GRAY,
     face = nil,
 }
 
