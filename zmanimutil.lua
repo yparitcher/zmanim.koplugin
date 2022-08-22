@@ -19,7 +19,7 @@ function ZmanimUtil:setLocation(place)
     self.location.latitude = place.latitude
     self.location.longitude = place.longitude
     ffi.C.setenv("TZ", place.timezone, 1)
-    self.candlelighting = place.candlelighting
+    self.candlelighting = place.candlelighting or 18
 end
 
 function ZmanimUtil:getLocation()
