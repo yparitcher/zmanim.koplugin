@@ -19,10 +19,15 @@ function ZmanimUtil:setLocation(place)
     self.location.latitude = place.latitude
     self.location.longitude = place.longitude
     ffi.C.setenv("TZ", place.timezone, 1)
+    self.candlelighting = place.candlelighting
 end
 
 function ZmanimUtil:getLocation()
     return self.location
+end
+
+function ZmanimUtil:getCandleLighting()
+    return self.candlelighting
 end
 
 function ZmanimUtil:setPlace(place)
@@ -39,6 +44,7 @@ function ZmanimUtil:setPlace(place)
         latitude = 40.66896,
         longitude = -73.94284,
         timezone = "EST5EDT,M3.2.0/2:00:00,M11.1.0/2:00:00",
+        candlelighting = 18,
     })
 end
 
@@ -71,6 +77,12 @@ function ZmanimUtil:newPlace()
                 hint = "EST5EDT,M3.2.0/2:00:00,M11.1.0/2:00:00",
                 text = "EST5EDT,M3.2.0/2:00:00,M11.1.0/2:00:00",
             },
+            {
+                description = ("Candle lighting"),
+                input_type = "number",
+                hint = 18,
+                text = 18
+            }
         },
         buttons = {{
             {
@@ -85,11 +97,13 @@ function ZmanimUtil:newPlace()
                 callback = function(touchmenu_instance)
                     local fields = MultiInputDialog:getFields()
                     if fields[1] ~= "" and fields[2] ~= ""
-                        and fields[3] ~= "" and fields[4] ~= "" then
+                        and fields[3] ~= "" and fields[4] ~= "" 
+                        and fields[5] ~= "" then
                         self.places:saveSetting(fields[1], {
                             latitude = tonumber(fields[2]),
                             longitude = tonumber(fields[3]),
                             timezone = fields[4],
+                            candlelighting = tonumber(fields[5]),
                         })
                         self.places:flush()
                         ZmanimUtil:setPlace(fields[1])
@@ -203,9 +217,18 @@ function ZmanimUtil:getNextDateChange()
 end
 
 function ZmanimUtil:getZman(hdate, zman, text, round)
+    local minutesbefore = 0
+
+    if zman == "getcandlelighting" then
+        minutesbefore = self.candlelighting
+        zman = "getsunset"
+    end
     local result = libzmanim[zman](hdate, self.location)
     if round then
         libzmanim.hdateaddsecond(result, 60-result.sec)
+    end
+    if minutesbefore > 0 then
+        libzmanim.hdateaddsecond(result, -60 * minutesbefore)
     end
     local zf = os.date("%I:%M %p %Z", tonumber(libzmanim.hdatetime_t(result)))
     return {zf, text}
