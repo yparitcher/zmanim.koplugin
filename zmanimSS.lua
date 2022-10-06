@@ -28,7 +28,7 @@ local cchar = ffi.typeof("char[?]")
 
 local FACE_NAME = "ezra"
 
-local ZmanimSS = InputContainer:new{
+local ZmanimSS = InputContainer:extend{
     name = "ZmanimSS",
     covers_fullscreen = true,
     modal = true,

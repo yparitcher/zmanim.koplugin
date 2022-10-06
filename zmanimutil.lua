@@ -2,13 +2,12 @@ local libzmanim = require("libzmanim_load")
 local DataStorage = require("datastorage")
 local LuaSettings = require("luasettings")
 local UIManager = require("ui/uimanager")
-local WidgetContainer = require("ui/widget/container/widgetcontainer")
 local _ = require("gettext")
 local ffi = require("ffi")
 local C = ffi.C
 local cchar = ffi.typeof("char[?]")
 
-local ZmanimUtil = WidgetContainer:new{
+local ZmanimUtil = {
     name = "ZmanimUtil",
     location = ffi.new("location"),
     places = LuaSettings:open(DataStorage:getSettingsDir() .. "/zmanim_locations.lua"),
@@ -83,7 +82,7 @@ function ZmanimUtil:newPlace()
             {
                 text = _("Save"),
                 callback = function(touchmenu_instance)
-                    local fields = MultiInputDialog:getFields()
+                    local fields = location_dialog:getFields()
                     if fields[1] ~= "" and fields[2] ~= ""
                         and fields[3] ~= "" and fields[4] ~= "" then
                         self.places:saveSetting(fields[1], {

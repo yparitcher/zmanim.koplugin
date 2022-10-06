@@ -53,7 +53,7 @@ local monthTranslation = {
     ["December"] = _("December"),
 }
 
-local CalendarDay = InputContainer:new{
+local CalendarDay = InputContainer:extend{
     daynum = nil,
     filler = false,
     width = nil,
@@ -171,7 +171,7 @@ function CalendarDay:onHold()
 end
 
 
-local CalendarWeek = InputContainer:new{
+local CalendarWeek = InputContainer:extend{
     width = nil,
     height = nil,
     day_width = 0,
@@ -307,7 +307,7 @@ function CalendarWeek:update()
     }
 end
 
-local ZmanimCalendar = InputContainer:new{
+local ZmanimCalendar = InputContainer:extend{
     start_day_of_week = 1, -- 1-7 = Sunday-Saturday
     nb_book_spans = 3,
     font_face = "xx_smallinfofont",

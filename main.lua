@@ -47,7 +47,7 @@ shabbosends = { { func = "gettzaisbaalhatanya", desc = "6°"}, { func = "gettzai
 }
 
 
-local Zmanim = WidgetContainer:new{
+local Zmanim = WidgetContainer:extend{
     name = "zmanim",
     screensaverwidget = nil,
     orig_rotation_mode = nil,
