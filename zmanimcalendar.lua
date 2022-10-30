@@ -70,18 +70,8 @@ function CalendarDay:init()
         return
     end
     if self.callback and Device:isTouchDevice() then
-        self.ges_events.Tap = {
-            GestureRange:new{
-                ges = "tap",
-                range = self.dimen,
-            }
-        }
-        self.ges_events.Hold = {
-            GestureRange:new{
-                ges = "hold",
-                range = self.dimen,
-            }
-        }
+        self.ges_events.Tap = { GestureRange:new{ ges = "tap", range = self.dimen, } }
+        self.ges_events.Hold = { GestureRange:new{ ges = "hold", range = self.dimen, } }
     end
 
     -- We need a smaller font size than the one provided
@@ -331,18 +321,13 @@ function ZmanimCalendar:init()
 
     if Device:hasKeys() then
         self.key_events = {
-            Close = { {"Back"}, doc = "close page" },
-            NextMonth = {{Input.group.PgFwd}, doc = "next page"},
-            PrevMonth = {{Input.group.PgBack}, doc = "prev page"},
+            Close = { {"Back"} },
+            NextMonth = { {Input.group.PgFwd} },
+            PrevMonth = { {Input.group.PgBack} },
         }
     end
     if Device:isTouchDevice() then
-        self.ges_events.Swipe = {
-            GestureRange:new{
-                ges = "swipe",
-                range = self.dimen,
-            }
-        }
+        self.ges_events.Swipe = { GestureRange:new{ ges = "swipe", range = self.dimen, } }
     end
 
     self.outer_padding = Size.padding.large
