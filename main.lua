@@ -142,7 +142,7 @@ require("logger").info("@@@ Suspend")
     if G_reader_settings:isTrue("zmanim_screensaver") and Device.wakeup_mgr then
         self.orig_rotation_mode = Screen:getRotationMode()
         if bit.band(self.orig_rotation_mode, 1) ~= 1 then
-            Screen:setRotationMode(Screen.ORIENTATION_LANDSCAPE_ROTATED)
+            Screen:setRotationMode(Screen.DEVICE_ROTATED_COUNTER_CLOCKWISE)
         else
             self.orig_rotation_mode = nil
         end
