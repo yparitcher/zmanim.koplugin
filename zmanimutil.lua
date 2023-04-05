@@ -31,8 +31,8 @@ function ZmanimUtil:setPlace(place)
         if v then
             self:setLocation(v)
             return
-	    end
-	    G_reader_settings:delSetting("zmanim_place")
+        end
+        G_reader_settings:delSetting("zmanim_place")
     end
     self:setLocation({
         latitude = 40.66896,
