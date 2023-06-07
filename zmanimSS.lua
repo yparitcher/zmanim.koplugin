@@ -59,13 +59,25 @@ function ZmanimSS:init()
 end
 
 function ZmanimSS:getZman(hdate, zman, text, round)
-    local result = libzmanim[zman](hdate, ZmanimUtil:getLocation())
+    local location = ZmanimUtil:getLocation()
+    
+    local minutesbefore = 0
+    
+    if zman == "getcandlelighting" then
+        minutesbefore = ZmanimUtil:getCandleLighting()
+        zman = "getsunset"
+    end
+    local result = libzmanim[zman](hdate, location)
     if round then
         libzmanim.hdateaddsecond(result, 60-result.sec)
+    end
+    if minutesbefore > 0 then
+        libzmanim.hdateaddsecond(result, -60 * minutesbefore)
     end
     local zf = os.date("%l:%M", tonumber(libzmanim.hdatetime_t(result)))
     return {zf, text}
 end
+
 
 function ZmanimSS:getShuir(hdate, shuir)
     local cshuir = cchar(100)
